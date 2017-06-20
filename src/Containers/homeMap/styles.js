@@ -1,0 +1,663 @@
+import { StyleSheet, Platform,Dimensions } from 'react-native'
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const ASPECT_RATIO = screenWidth / screenHeight;
+
+/* Styles ==================================================================== */
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor:'#FFF',
+  },
+  map: {
+    flex: 1,
+  },
+  mapWrapper: {
+    flex: 1,
+    width:screenWidth,
+    height:screenHeight
+  },
+  buttonMyLocation: {
+    position: 'absolute',
+    right: 10,
+    bottom: 24,
+    width:56,
+    height:56,
+  },
+  imageFocusLocation: {
+    width: 56,
+    height: 56,
+  },
+  imageMyLocationMarker: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+  },
+  locationAvatarWrapper: {
+    height: 42,
+    width: 42,
+    borderRadius: 21,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 3,
+  },
+  imageLocationAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  calculatingRouteContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageCalculatingRoute: {
+    width: 271,
+    height: 271,
+  },
+  bottomGoContainer: {
+    height: 150,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+  },
+  inputTextContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputText: {
+    flex: 1,
+    fontFamily: 'Exo-Regular',
+    fontSize: 17,
+    height: 53,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  locationAddress: {
+    fontFamily: 'Exo-Regular',
+    fontSize: 17,
+  },
+
+  imageWrapper: {
+    width: 54,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft:38
+  },
+  imageSearch: {
+    width: 18,
+    height: 18,
+  },
+  imageDesination: {
+    width: 24,
+    height: 31,
+  },
+
+  textButton: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 22,
+    color: '#fff',
+  },
+  imageRabbit: {
+    width: 29,
+    height: 17,
+  },
+  buttonWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#5fdf71',
+    height: 44,
+    width:screenWidth,
+  },
+  bottomSendRequestContainer: {
+    height: 97,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+  },
+
+  bottomWaitAndCancelContainer: {
+    height: 120,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+  },
+  userPrizeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 22,
+    borderBottomLeftRadius: 22,
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shopContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#5fdf71',
+    borderBottomRightRadius: 11,
+    borderTopRightRadius: 11,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageToken: {
+    width: 19,
+    height: 19,
+  },
+  textToken: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 22,
+    color: '#944b13',
+    marginLeft: 4,
+  },
+  textShop: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 22,
+    color: '#fff',
+  },
+  topContainer: {
+    flexDirection: 'row',
+    height: 76,
+    paddingHorizontal: 17,
+    backgroundColor: 'rgba(69, 149, 250, 0.9)',
+  },
+  topCellContainer: {
+    flex: 1,
+    marginBottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  topPaddingContainer: {
+    width: 16,
+  },
+  textFieldName:{
+    fontFamily: 'Exo-DemiBold',
+    height: 21,
+    fontSize: 16,
+    color: '#fff',
+  },
+  fieldNameContainer: {
+    flex: 1,
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    backgroundColor: '#000',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textCurrentPrize: {
+    fontFamily: 'Exo-Bold',
+    fontSize: 30,
+    color: '#fcea61',
+    marginLeft: 5,
+  },
+  timeFieldContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textTimeValue: {
+    fontFamily: 'Exo-Bold',
+    fontSize: 20,
+    color: '#fff',
+    height: 27,
+  },
+  textTimeLabel: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 8,
+    color: '#929497',
+  },
+  bottomGoContainer: {
+    height: 150,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+    width:screenWidth,
+  },
+  inputTextContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputText: {
+    flex: 1,
+    fontFamily: 'Exo-Regular',
+    fontSize: 17,
+    height: 53,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  locationAddress: {
+    fontFamily: 'Exo-Regular',
+    fontSize: 17,
+  },
+  line: {
+    height: 1,
+    width: screenWidth,
+    backgroundColor: '#4595fa',
+  },
+  imageWrapper: {
+    width: 54,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageSearch: {
+    width: 18,
+    height: 18,
+  },
+  imageDesination: {
+    width: 24,
+    height: 31,
+  },
+  textButton: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 22,
+    color: '#fff',
+  },
+  imageRabbit: {
+    width: 29,
+    height: 17,
+  },
+  bottomSendRequestContainer: {
+    height: 97,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+  },
+  textCostOfRide: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 25,
+    color: '#4595fa',
+  },
+  textCostOfRideValue: {
+    fontFamily: 'Exo-Bold',
+    fontSize: 30,
+    color: '#4595fa',
+  },
+  imageDestinationLocationMarker: {
+    width: 47,
+    height: 61,
+    alignItems: 'center',
+  },
+  destionationCallout: {
+    width: 184,
+    height: 47,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  textAddress: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 12,
+    color: '#fff',
+  },
+  textDistance: {
+    fontFamily: 'Exo-Medium',
+    fontSize: 18,
+    color: '#fff',
+  },
+  arrow: {
+    backgroundColor: 'transparent',
+    borderWidth: 5,
+    borderColor: 'transparent',
+    borderTopColor: 'rgba(0, 0, 0, 0.7)',
+    alignSelf: 'center',
+  },
+  textSendRequestTitle:{
+   fontFamily: 'Exo-Bold',
+    fontSize:25,
+    color: '#4595fa',
+    marginTop: 15,
+  },
+  textSendRequestOne:{
+    fontFamily: 'Exo-Regular',
+    fontSize:18,
+    color: '#929497',
+    marginTop: 18,
+    textAlign :'center',
+  },
+  textSendRequestTwo:{
+    fontFamily: 'Exo-Regular',
+    fontSize:18,
+    color: '#929497',
+    marginTop: 5,
+  },
+  textSendRequestApprove:{
+    fontFamily: 'Exo-Regular',
+    fontSize:14,
+    color: '#A9A9A9',
+    marginTop: 1,
+  },
+  textSendRequestTerms:{
+    fontFamily: 'Exo-Medium',
+    fontSize:14,
+    color: '#4595fa',
+    marginTop: 1,
+  },
+  buttonSendRequestApprove:{
+    backgroundColor: '#5fdf71',
+    height:45,
+    width:'50%',
+    borderRadius:1,
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  buttonSendRequestDecline:{
+    backgroundColor: '#ff0000',
+    height: 45,
+    width:'30%',
+    borderRadius:1,
+    marginLeft:16,
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  popUpButtonText: {
+    fontFamily: 'Exo-Medium',
+    textAlign:'center',
+    color:'#fff',
+    fontSize: 18,
+  },
+
+  driverBottomRequestContainer: {
+    height: 280,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 1.0,
+    shadowRadius: 10,
+    width:screenWidth,
+  },
+  driverNameTest:{
+    fontFamily: 'Exo-Medium',
+    textAlign:'center',
+    color:'#fff',
+    fontSize: 18,
+    fontStyle :'italic',
+  },
+  driverRideTokenAmount:{
+    fontFamily: 'Exo-Bold',
+    textAlign:'center',
+    color:'#fff',
+    fontSize: 30,
+    marginTop: -9
+  },
+  driverImageToken:{
+    width:16,
+    height:16,
+  },
+  driverRidePriceText:{
+    fontFamily: 'Exo-Regular',
+    textAlign:'center',
+    color:'#fff',
+    fontSize: 18,
+
+  },
+  driverPickupRequestView:{
+    backgroundColor: '#5fdf71',
+    height:100,
+  },
+  driverAvatarWrapper: {
+    width: 52,
+    height: 52,
+    borderRadius: 23,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  driverImageAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 23,
+  },
+  driverTextPickUp:{
+    fontFamily: 'Exo-Medium',
+    textAlign:'center',
+    color:'#fff',
+    fontSize: 24,
+  },
+  driverAcceptRideBtn:{
+    backgroundColor: '#5fdf71',
+    height:50,
+    flex:1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  driverDeclineRideBtn:{
+    backgroundColor: '#ff0000',
+    height:50,
+    flex:1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  driverRideApprovedRectangle:{
+    height: 103,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 0.9,
+    shadowRadius: 12,
+  },
+  rideApproveTimePickUp:{
+    width:'45%',
+    fontFamily: 'Exo-Medium',
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#4595fa',
+    fontWeight :'600',
+
+  },
+  rideViewRectangle:{
+    width:'45%',
+    flexDirection:'row',
+    backgroundColor:'#262626',
+    height:54,
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:5,
+  },
+  rideViewRectangleRight:{
+    width:'45%',
+    marginLeft:10,
+    flexDirection:'row',
+    backgroundColor:'#262626',
+    height:54,
+    justifyContent:'center',
+    alignItems:'center',
+    borderRadius:5,
+  },
+  rideApproveTextTimeDistance:{
+    fontFamily: 'Exo-Bold',
+    fontSize: 35,
+    textAlign: 'center',
+    color: '#FFF',
+  },
+  rideApproveTextMinMiles:{
+    fontFamily: 'Exo-Regular',
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#FFF',
+    marginTop:10,
+    marginLeft:3,
+
+  },
+
+  offerRideView:{
+
+  },
+  requestARideButton:{
+    width:'80%',
+    backgroundColor:'#5fdf71',
+    height:45 ,
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  offerARideButton:{
+    width:'80%',
+    backgroundColor:'#4595fa',
+    height:45 ,
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:20
+  },
+  rateRectangle:{
+    height: 180,
+    width:screenWidth,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowColor: '#000',
+    shadowOpacity: 0.9,
+    shadowRadius: 12,
+    flexDirection:'column',
+  },
+  buttonCallIcon: {
+    position: 'absolute',
+    right: 2,
+    bottom: 17,
+    width:60,
+    height:60,
+  },
+  buttonEndRideText: {
+    position: 'absolute',
+    left: 2,
+    bottom: 17,
+    width:80,
+    height:60,
+  },
+  imageCallIcon: {
+    width: 60,
+    height: 60,
+  },
+
+  popup_bg_sub_view1: {
+    height: 200,
+    alignItems: 'center',
+    backgroundColor:'#4595fa',
+  },
+  popup_bg_sub_view2: {
+    height: 140,
+    alignItems: 'center',
+    backgroundColor:'#ffffff',
+  },
+  congratulations_text:{
+     fontFamily: 'Exo-Bold',
+     fontSize: 35,
+     color: '#ffffff',
+     textAlign :'center',
+     marginTop : 10,
+     marginBottom:10,
+  },
+  user_bg_view: {
+    alignItems: 'center',
+    flexDirection:'row',
+    marginTop:-5,
+    marginRight:10,
+  },
+  user_image: {
+    height: 60,
+    width: 60,
+  },
+  user_address_view: {
+    justifyContent: 'center',
+    marginLeft:6,
+  },
+  user_name_text:{
+     fontFamily: 'Exo-Bold',
+     fontSize: 18,
+     color: '#ffffff',
+     backgroundColor:'transparent',
+     textAlign :'left',
+     marginLeft:5,
+     fontStyle:'italic',
+     marginTop:8,
+  },
+  user_address_text:{
+     fontFamily: 'Exo-Medium',
+     fontSize: 16,
+     color: '#ffffff',
+     backgroundColor:'transparent',
+     textAlign :'left',
+     marginLeft:5,
+  },
+  pickup_text:{
+     fontFamily: 'Exo-Medium',
+     fontSize: 30,
+     color: '#ffffff',
+     backgroundColor:'transparent',
+     textAlign :'left',
+     marginLeft:5,
+     marginTop:8,
+  },
+  call_view: {
+    height: 44,
+    width: 200,
+    marginTop:30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:'#5fdf71',
+  },
+  call_text:{
+     fontFamily: 'Exo-Medium',
+     fontSize: 18,
+     color: '#ffffff',
+     backgroundColor:'transparent',
+     textAlign :'center',
+  },
+  close_View: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop : 20
+  },
+  close_text:{
+     fontFamily: 'Exo-Medium',
+     fontSize: 20,
+     color: '#8f8f8f',
+     textAlign :'center',
+  },
+});
+
+export default styles;

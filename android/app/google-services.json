@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "506631520738",
+    "firebase_url": "https://commuterz-5d5ad.firebaseio.com",
+    "project_id": "commuterz-5d5ad",
+    "storage_bucket": "commuterz-5d5ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506631520738:android:cede63c95c8ac6d0",
+        "android_client_info": {
+          "package_name": "com.commuterz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "506631520738-fq9idfpv7hm81k2qdsh7ffalkg8qt9nh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.commuterz",
+            "certificate_hash": "d42e99f3d6e9b84ec63256f9a3046cfbbbb3f4d4"
+          }
+        },
+        {
+          "client_id": "506631520738-pcr481tvooj84rsrklikd5v873c2ft4o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.commuterz",
+            "certificate_hash": "50cd317b4ca4b2327c16d75ae2a600b263413a62"
+          }
+        },
+        {
+          "client_id": "506631520738-dqfr3pbr8shj6j7d6abqsbc9ejvvv7hk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPGmldMaS_BLgsbzVb3Ouqb8uYInXYEjY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "506631520738-dqfr3pbr8shj6j7d6abqsbc9ejvvv7hk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
