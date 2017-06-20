@@ -1,7 +1,7 @@
 'use strict';
 
 import React, {Component} from 'react';
-import {StyleSheet,Text,View,Image,TextInput,Keyboard,Alert,WebView,Dimensions,TouchableOpacity,StatusBar,Platform,
+import {StyleSheet,Text,View,Image,TextInput,Keyboard,Alert,WebView,Dimensions,TouchableHighlight,TouchableOpacity,StatusBar,Platform,
   PermissionsAndroid,Modal,AsyncStorage,NetInfo} from 'react-native';
 import styles from './styles'
 import BackgroundImage from '@Components/BackgroundImage'
@@ -44,8 +44,8 @@ const { width: screenWidth, height: screenHiehgt } = Dimensions.get('window');
 
 const ASPECT_RATIO = screenWidth / screenHiehgt;
 const ANCHOR = { x: 0.5, y: 0.5 };
-const LATITUDE = 37.78825;
-const LONGITUDE = -122.4324;
+const LATITUDE = 31.0461;
+const LONGITUDE = 34.8516;
 const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
@@ -523,7 +523,7 @@ fcmTokenAndNotificationHandling(){
 }
 
 showLocalNotificationForeground(notif) {
-  if(!this.state.isRiderApp && this.state.isDriverApp){
+  if(!this.state.isRiderApp){
     if(notif.type === 'Ride request'){
       Alert.alert( 'Ride Request', 'You have a new ride request.',
         [{text: 'OK', onPress: () => this.updateDriverRideRequestData(notif)}, ],
@@ -1212,17 +1212,24 @@ riderEmergencyButton(){
 }
 /*******************************End Rider Components*****************************************/
 
+
+
 render()
   {
-    return (
+
+
+  return (
         <View style={styles.container}>
           <HomeTopBar tokenBalance = {this.state.tokenBalance}
             loginProfilePic = {this.state.loginProfilePic}/>
           <PriceTimer/>
           <View style={ styles.mapWrapper } >
-          <MapView style={styles.map} region={this.state.region}
+
+          <MapView style={styles.map}
             ref={component => this._map = component}
-             onRegionChange={this.onRegionChange.bind(this)} showsCompass={true}  defaultZoom={12}
+            region={this.state.region}
+            onRegionChangeComplete={this.onRegionChange.bind(this)}
+             showsCompass={true}  defaultZoom={12}
              followUserLocation={true}  showsUserLocation={true} >
              {!this.state.isDriverApp && !this.state.rideStartAndPickedUp &&
               <MapView.Marker
@@ -1286,14 +1293,12 @@ render()
                           image={require("@Resources/Images/driver-car.png")}
                   />
                 }
-
-
           </MapView>
             { this.renderMyLocationButton }
           </View>
-            { this.renderBottomContent }
+          { this.renderBottomContent }
 
-            <Modal visible={this.state.modalVisible} onRequestClose={() => {this.setState({modalVisible:false })}}>
+          <Modal visible={this.state.modalVisible} onRequestClose={() => {this.setState({modalVisible:false })}}>
               <AutoCompleteAddressModel onSelect = {(value) => {
                 if (this.state.isDestinationSelected){
                   this._coordinatesFromAddress(value)
@@ -1304,7 +1309,7 @@ render()
                 }
              }}
              onCancel ={()=>{this.setState({modalVisible:false });}} />
-            </Modal>
+          </Modal>
 
             <PopupDialog ref={(popupDialog) => { this.popupDialog = popupDialog; }}
                 closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="45%">
@@ -1333,9 +1338,9 @@ render()
                   </View>
 
                   <View style ={styles.buttonSendRequestDecline}>
-                     <TouchableOpacity  onPress={this.declineRequestPopup.bind(this)} >
+                     <TouchableHighlight  onPress={this.declineRequestPopup.bind(this)} >
                          <Text style={styles.popUpButtonText} > Decline </Text>
-                     </TouchableOpacity>
+                     </TouchableHighlight>
                    </View>
                  </View>
                </View>
@@ -1359,22 +1364,22 @@ render()
 
                  <View style={{alignItems:'center',flexDirection: 'column', marginTop:-8,}}>
                  <Text style={styles.textSendRequestApprove}>By Approving you agree to our</Text>
-                 <TouchableOpacity  onPress={this.openTermsDialog.bind(this)} >
+                 <TouchableHighlight  onPress={this.openTermsDialog.bind(this)} >
                   <Text style={styles.textSendRequestTerms}>Terms and Conditions</Text>
-                  </TouchableOpacity>
+                  </TouchableHighlight>
                  </View>
 
                 <View style={{flexDirection:'row' ,flex:1,justifyContent:'center', marginTop:20}}>
                  <View style ={styles.buttonSendRequestApprove}>
-                    <TouchableOpacity  onPress={this.approveRideRequestPopup.bind(this)} >
+                    <TouchableHighlight  onPress={this.approveRideRequestPopup.bind(this)} >
                         <Text style={styles.popUpButtonText} > Approve </Text>
-                    </TouchableOpacity>
+                    </TouchableHighlight>
                   </View>
 
                   <View style ={styles.buttonSendRequestDecline}>
-                     <TouchableOpacity  onPress={this.declineRideRequestPopup.bind(this)} >
+                     <TouchableHighlight  onPress={this.declineRideRequestPopup.bind(this)} >
                          <Text style={styles.popUpButtonText} > Decline </Text>
-                     </TouchableOpacity>
+                     </TouchableHighlight>
                    </View>
                  </View>
                </View>
@@ -1421,9 +1426,9 @@ render()
                <View style={{height:50,justifyContent:'center',alignItems:'center',flexDirection:'row',backgroundColor:'#4595fa',}}>
                   <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:18,color:'#FFF'}}>Terms and Conditions </Text>
                   <View style={{right:5,position:'absolute'}}>
-                  <TouchableOpacity onPress={this.closeTermsDialog.bind(this)}>
+                  <TouchableHighlight onPress={this.closeTermsDialog.bind(this)}>
                    <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:16,color:'#FFF'}}>Close</Text>
-                   </TouchableOpacity>
+                   </TouchableHighlight>
                    </View>
                  </View>
                   <View style={{width:'100%',height:'100%'}}>
@@ -1456,51 +1461,51 @@ get renderMyLocationButton() {
     if(this.state.isRideStarted){
         return(
             <View style={{flexDirection:'column'}}>
-                <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonCallIcon } onPress={this.rideEndByDriver.bind(this)}>
+                <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon } onPress={this.rideEndByDriver.bind(this)}>
                   <Image source={ require("@Resources/Images/ride-start-icon.png") } style={ styles.imageCallIcon }/>
-                </TouchableOpacity>
-                <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonEndRideText } onPress={this.rideEndByDriver.bind(this)}>
+                </TouchableHighlight>
+                <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonEndRideText } onPress={this.rideEndByDriver.bind(this)}>
                     <Text style={{padding:5,fontSize:16,fontFamily:'Exo-Medium',backgroundColor:'rgba(0,0,0,0.75)',color:'#FFF'}}>End Ride</Text>
-                </TouchableOpacity>
+                </TouchableHighlight>
             </View>
         );
     }
     else if(this.state.isDriverApprovedRide){
         return(
           <View style={{flexDirection:'column'}}>
-            <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonEndRideText } onPress={this.startRideOnButton.bind(this)}>
+            <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonEndRideText } onPress={this.startRideOnButton.bind(this)}>
                 <Text style={{padding:5,fontSize:16,fontFamily:'Exo-Medium',backgroundColor:'rgba(0,0,0,0.75)',color:'#FFF'}}>
                   Start Ride
                 </Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonCallIcon } onPress={ this.checkDriverReachNearToRider.bind(this)}>
+            </TouchableHighlight>
+            <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon } onPress={ this.checkDriverReachNearToRider.bind(this)}>
               <Image source={ require("@Resources/Images/call-icon.png") } style={ styles.imageCallIcon }/>
-            </TouchableOpacity>
+            </TouchableHighlight>
           </View>
         );
     }
   }else{
     if(this.state.isCalculatedResult && this.state.riderWaitingForPickUp){
         return(
-          <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonCallIcon }>
+          <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon }>
               <Image source={ require("@Resources/Images/call-icon.png") } style={ styles.imageCallIcon }/>
-          </TouchableOpacity>
+          </TouchableHighlight>
         );
     }else if(this.state.isCalculatedResult && this.state.rideStartAndPickedUp){
-      <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonCallIcon }>
+      <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon }>
         <Image source={ require("@Resources/Images/ride-start-icon.png") } style={ styles.imageCallIcon }/>
-      </TouchableOpacity>
+      </TouchableHighlight>
     }else if(this.state.isCalculatedResult){
         return(
-          <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
+          <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
               <Image source={ require("@Resources/Images/focusLocation.png") } style={ styles.imageFocusLocation }/>
-          </TouchableOpacity>
+          </TouchableHighlight>
         );
     }else{
       return(
-        <TouchableOpacity activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
+        <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
             <Image source={ require("@Resources/Images/focusLocation.png") } style={ styles.imageFocusLocation }/>
-        </TouchableOpacity>
+        </TouchableHighlight>
       );
     }
   }
@@ -1561,14 +1566,14 @@ get renderBottomContent(){
               </View>
               <View style={{flexDirection:'row', justifyContent:'center',height:50,bottom:0}}>
                    <View style ={styles.driverAcceptRideBtn}>
-                        <TouchableOpacity  onPress={this.acceptRideRequest.bind(this)} >
+                        <TouchableHighlight  onPress={this.acceptRideRequest.bind(this)} >
                             <Text style={{fontFamily: 'Exo-Medium',  textAlign:'center',color:'#fff',fontSize: 20,}} > Accept Ride </Text>
-                        </TouchableOpacity>
+                        </TouchableHighlight>
                       </View>
                       <View style ={styles.driverDeclineRideBtn}>
-                         <TouchableOpacity  onPress={this.declineRideRequest.bind(this)} >
+                         <TouchableHighlight  onPress={this.declineRideRequest.bind(this)} >
                              <Text style={{fontFamily: 'Exo-Medium',  textAlign:'center',color:'#fff',fontSize: 20,}} > Decline Ride </Text>
-                         </TouchableOpacity>
+                         </TouchableHighlight>
                     </View>
               </View>
             </View>
@@ -1614,9 +1619,9 @@ get renderBottomContent(){
                <Text style={{fontSize:16,color:'#9b9b9b',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
               </View>
               <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
-              <TouchableOpacity activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
+              <TouchableHighlight activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
                   <Text style={{fontSize:22,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
-              </TouchableOpacity>
+              </TouchableHighlight>
               </View>
              </View>
          );
@@ -1627,25 +1632,25 @@ get renderBottomContent(){
         <View style={ styles.bottomGoContainer }>
             <View style={ styles.inputTextContainer }>
              <Image source={ require("@Resources/Images/search-blue.png") } style={{marginLeft:8,marginRight:'3%',} }/>
-             <TouchableOpacity activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
+             <TouchableHighlight activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
                 onPress={() => {  this.setState({modalVisible: true,isDestinationSelected:false})}}>
                   <Text style={ styles.locationAddress} numberOfLines={1}>{ this.state.myLocationAddress } </Text>
-                </TouchableOpacity>
+                </TouchableHighlight>
             </View>
               <View style={{height:1,backgroundColor:'#4595fa'} }/>
               <View style={ styles.inputTextContainer }>
               <Image source={ require("@Resources/Images/destination-flag-blue.png") } style={{marginLeft:8,marginRight:'3%',}}/>
-              <TouchableOpacity activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
+              <TouchableHighlight activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
               onPress={() => {  this.setState({modalVisible: true, isDestinationSelected:true})}}>
                 <Text style={ styles.locationAddress} numberOfLines={1}>{ this.state.destinationAddress } </Text>
-              </TouchableOpacity>
+              </TouchableHighlight>
               </View>
-              <TouchableOpacity activeOpacity={ .5 } onPress={this.onGoButton.bind(this) }>
+              <TouchableHighlight activeOpacity={ .5 } onPress={this.onGoButton.bind(this) }>
                 <View style={ styles.buttonWrapper }>
                   <Text style={ styles.textButton }>GO!</Text>
                   <Image source={ require("@Resources/Images/rabbit-icon-white.png") } style={ styles.imageRabbit }/>
                 </View>
-              </TouchableOpacity>
+              </TouchableHighlight>
         </View>
       );
     }
@@ -1661,11 +1666,11 @@ get renderBottomContent(){
                 <Text style={ styles.textCostOfRideValue }>{this.state.routeCostToken}</Text>
               </View>
               <View style={{width:screenWidth,height:44,}}>
-              <TouchableOpacity activeOpacity={ .5 } onPress={ () => this.cancelRide() }>
+              <TouchableHighlight activeOpacity={ .5 } onPress={ () => this.cancelRide() }>
                 <View style={ styles.buttonWrapper }>
                   <Text style={ styles.textButton }>Cancel Ride</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableHighlight>
               </View>
           </View>
         );
@@ -1733,9 +1738,9 @@ get renderBottomContent(){
            <Text style={{fontSize:16,color:'#9b9b9b',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
           </View>
           <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
-          <TouchableOpacity activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
+          <TouchableHighlight activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
               <Text style={{fontSize:22,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
-          </TouchableOpacity>
+          </TouchableHighlight>
           </View>
          </View>
         );
@@ -1748,11 +1753,11 @@ get renderBottomContent(){
               <Text style={ styles.textCostOfRideValue }>{this.state.routeCostToken}</Text>
             </View>
             <View style={{width:screenWidth,height:44,}}>
-            <TouchableOpacity activeOpacity={ .5 } onPress={ () => this.onSendRequest() }>
+            <TouchableHighlight activeOpacity={ .5 } onPress={ () => this.onSendRequest() }>
               <View style={ styles.buttonWrapper }>
                 <Text style={ styles.textButton }>Send Request</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableHighlight>
             </View>
           </View>
         );

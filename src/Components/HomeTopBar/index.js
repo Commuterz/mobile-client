@@ -5,6 +5,7 @@ import {LoginManager} from 'react-native-fbsdk';
 import { Actions, Scene } from 'react-native-router-flux'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import loginUserApiCall from '@API/loginUserApiCall'
 
 class HomeTopBar extends Component {
   constructor(props){
@@ -25,12 +26,32 @@ logoutUser(){
     AsyncStorage.setItem("userEthereumAddress", '')
     AsyncStorage.setItem("userIpfs", '')
     AsyncStorage.setItem("isLogin",'0')
+    this.logoutFromFacebook();
     Actions.login();
 }
-  onShop() {
-      alert("Tapped Shop!");
-  }
-  render() {
+// logout from facebook
+logoutFromFacebook(){
+    LoginManager.logOut();
+}
+onShop() {
+  var self = this;
+  AsyncStorage.getItem("userPrivateKey", (errs,userPrivateKey) => {
+       if (!errs) {
+           if (userPrivateKey !== null) {
+             loginUserApiCall.shopCall(userPrivateKey ,function(err,result){
+               if(result){
+                Alert.alert('Alert','You have shoped successfully.');
+               }else{
+                 Alert.alert('Alert','Error '+err);
+               }
+             });
+          }
+        }
+   });
+}
+
+
+render() {
     const {tokenBalance,loginProfilePic,source, children, style, ...props} = this.props
     //console.warn('image' +loginProfilePic );
     let pic = {

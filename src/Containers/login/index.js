@@ -1,7 +1,7 @@
 'use strict';
 
 import React, {Component} from 'react';
-import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,AsyncStorage,NetInfo} from 'react-native';
+import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,AsyncStorage,NetInfo,Platform} from 'react-native';
 import BackgroundImage from '@Components/BackgroundImage'
 import styles from './styles'
 import { Actions, Scene } from 'react-native-router-flux'
@@ -31,20 +31,25 @@ var userPassword;
 var userSalt = "commuterz";
 var userIpfs = "";
 var facebookProfileResult;
+var hideView = true;
 class Login extends Component
 {
+
   constructor(props)
   {
     super(props);
     this.state = {
       loaderVisible: false,
+      hideOtherComponent:hideView,
     };
 
   }
 
 componentDidMount(){
+
 }
 componentWillMount(){
+  this.setState({hideOtherComponent:true})
   var  self = this;
   AsyncStorage.getItem("isLogin", (errs,result) => {
        if (!errs) {
@@ -59,6 +64,8 @@ componentWillMount(){
  {
 
    //this.logoutFromFacebook();
+   //LoginManager.setLoginBehavior(LoginManager.LoginBehaviors.WEB_VIEW_ONLY); // defaults to Native
+  LoginManager.setLoginBehavior(Platform.OS === 'ios' ? 'web' : 'web_only')
    var self = this;
    LoginManager.logInWithReadPermissions(['public_profile','email']).then(
     function(result) {
@@ -244,6 +251,9 @@ render()
            <Image source={require('@Resources/Images/rabit-white.png')}/>
             <Text style={styles.textLogo}>ommuterz</Text>
           </View>
+         <Text style={styles.textCarTitle}>Making Carpooling Fun Again</Text>
+
+          {!this.state.hideOtherComponent &&
             <View style={{width:'85%', height:102,borderRadius:6,borderWidth:1,borderColor:'#FFFF'}}>
 
               <TextInput ref='1' style={styles.textInput} underlineColorAndroid='transparent' returnKeyType="next" keyboardType="email-address"  placeholder='Email' placeholderTextColor='#FFF' onSubmitEditing={() => this.refs[2].focus()}/>
@@ -252,12 +262,15 @@ render()
 
               <TextInput ref='2' style={styles.textInput} underlineColorAndroid='transparent' secureTextEntry={true}  returnKeyType="done" placeholder='Password' placeholderTextColor='#FFF'/>
             </View>
+          }
 
+          {!this.state.hideOtherComponent &&
             <TouchableOpacity style={styles.loginButtonBg}  onPress={this._loginWithEmail.bind(this)}>
               <View style={{width:'100%',height:'100%',justifyContent:'center',alignItems:'center'}}>
                 <Text style={styles.textbutton}>Sign In</Text>
               </View>
             </TouchableOpacity>
+          }
 
             <TouchableOpacity style={styles.facebookButtonBg}  onPress={this._loginWithFacebook.bind(this)}>
             <View style={{width:'100%',height:'100%',justifyContent:'center',alignItems:'center'}}>
@@ -265,11 +278,15 @@ render()
             </View>
             </TouchableOpacity>
 
+
+            {!this.state.hideOtherComponent &&
             <TouchableOpacity style={styles.signupButtonBg} onPress={this._signUp.bind(this)}>
             <View style={{width:'100%',height:'100%',justifyContent:'center',alignItems:'center'}}>
               <Text style={styles.textbutton}>SignUp</Text>
             </View>
             </TouchableOpacity>
+           }
+
 
             <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={this.state.loaderVisible}
              textContent={"Please wait.."} textStyle={{color: '#FFF',fontFamily:"Exo-Regular"}} ></Spinner>

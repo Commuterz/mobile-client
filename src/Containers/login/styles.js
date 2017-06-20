@@ -10,10 +10,17 @@ const styles = StyleSheet.create({
   textLogo:{
     fontSize:35,
     color:'#FFFF',
-    height:76,
     marginTop:20,
+    marginBottom:8,
     marginLeft:-18,
     fontFamily:'Exo-Medium'
+  },
+  textCarTitle:{
+    fontSize:24,
+    marginBottom:75,
+    color:'#FFFF',
+    height:50,
+    fontFamily:'Exo-Regular'
   },
   textInput:{
     height: 50,

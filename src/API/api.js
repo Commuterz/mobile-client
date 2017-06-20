@@ -6,6 +6,7 @@ var common = require('./common.js');
 module.exports.register = function ( privateKey, ipfsLink, callback ) {
     var commuterzInstance = common.getCommuterzInstance();
     var txData = commuterzInstance.register.getData(ipfsLink);
+
     return common.signAndSend( privateKey,
                                txData,
                                commuterzInstance.address,
@@ -32,6 +33,7 @@ module.exports.getUserBalance = function ( ethereumAddress, callback ) {
 module.exports.getUserIPFSLink = function ( ethereumAddress, callback ) {
     var account = ethereumAddress;
     var commuterzInstance = common.getCommuterzInstance();
+
     return commuterzInstance.getUserIPFSLink(account, function(err,result){
         callback(err,result);
     });
@@ -53,7 +55,9 @@ module.exports.approveTokensToContract = function ( privateKey, rideCost, callba
     common.getTokenInstance(function(err,result){
         tokenInstance = result;
         if( err ) return callback(err, result);
-        var txData = tokenInstance.approve.getData("0x" + common.getCommuterzAddress().toString(16), rideCost);
+
+        var txData = tokenInstance.approve.getData(common.getCommuterzAddress().toString(), rideCost);
+
         return common.signAndSend( privateKey,
                                    txData,
                                    tokenInstance.address,
@@ -134,6 +138,28 @@ module.exports.userRate = function (privateKey, rideId, rating, callback ) {
                                callback );
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+module.exports.debugShop = function (privateKey, callback ) {
+    var txData = common.getCommuterzInstance().debugShop.getData();
+    return common.signAndSend( privateKey,
+                               txData,
+                               common.getCommuterzInstance().address,
+                               0,
+                               callback );
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+module.exports.debugGamePrize = function (privateKey, seed, amount, callback ) {
+    var txData = common.getCommuterzInstance().debugGamePrize.getData(seed,amount);
+    return common.signAndSend( privateKey,
+                               txData,
+                               common.getCommuterzInstance().address,
+                               0,
+                               callback );
+};
+
 
 
 
@@ -157,13 +183,14 @@ module.exports.getSomeEtherInRegistration = function( destAccount, callback ) {
     return common.signAndSend( key,
                                "0x00",
                                destAccount,
-                               new BigNumber(10).pow(17), // 1/2 ether
+                               new BigNumber(10).pow(18), // 1 ether
                                callback );
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
 
+
+////////////////////////////////////////////////////////////////////////////////
 module.exports.getGameBalance = function ( callback ) {
     common.getGameInstance( function( err, instance ){
         if( err ) return callback(err, null);
@@ -173,9 +200,7 @@ module.exports.getGameBalance = function ( callback ) {
         });
     });
 };
-
 ////////////////////////////////////////////////////////////////////////////////
-
 module.exports.runGame = function ( callback ) {
     var ownerPrivateKey = common.getPrivateKey("commuterz","");
     var txData = common.getCommuterzInstance().doGame.getData();
@@ -185,18 +210,14 @@ module.exports.runGame = function ( callback ) {
                                0,
                                callback );
 };
-
 ////////////////////////////////////////////////////////////////////////////////
-
 module.exports.getGameWinner = function ( callback ) {
     common.getGameInstance( function( err, instance ){
         if( err ) return callback(err, null);
         instance.winner(callback);
     });
 };
-
 ////////////////////////////////////////////////////////////////////////////////
-
 module.exports.winnerCollectPrize = function ( winnerPrivateKey, callback ) {
     common.getGameInstance( function( err, instance ){
         if( err ) return callback(err, null);
