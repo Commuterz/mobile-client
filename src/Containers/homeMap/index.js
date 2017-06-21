@@ -90,6 +90,7 @@ export default class Home extends Component
       calculatingRoute: false,
       isCalculatedResult: false,
       modalVisible: false,
+      loadingWithText:false,
       isDestinationSelected:false,
       isDestinationRouteDraw:false,
       routeDistance:initialDistance,
@@ -325,7 +326,7 @@ componentWillMount(){
   NetInfo.isConnected.fetch().then(isConnected => {
      console.log('First, is ' + (isConnected ? 'online' : 'offline'));
      if(isConnected){
-       this.setState({loaderVisible:true});
+      //this.setState({loadingWithText:true});
       this.fetchUserBalanceDispatcher();
       this.fetchUserProfileData();
      }else{
@@ -415,7 +416,8 @@ const intervalId = BackgroundTimer.setInterval(() => {
                  if(result){
                    //console.warn('result' + result);
                    selfBalance.setState({tokenBalance:result.toString(10)})
-                   selfBalance.setState({loaderVisible:false});
+                   //selfBalance.setState({loadingWithText:false});
+                  // selfBalance.setState({loaderVisible:false});
                  }else{
                    console.log("Error" +err);
                  }
@@ -448,7 +450,8 @@ fetchUserProfileData(){
                   self.setState({loginProfilePic:profilePic});
                   self.setState({loginName:name});
                   self.setState({loginFBID:fbID});
-                  self.setState({loaderVisible:false});
+                  //self.setState({loadingWithText:false});
+                //  self.setState({loaderVisible:false});
               }
           }).done();
       }
@@ -1451,6 +1454,9 @@ render()
               </View>
             </Spinner>
 
+            <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={this.state.loadingWithText}
+             textContent={"Please wait.."} textStyle={{color: '#FFF',fontSize:16,fontFamily:"Exo-Regular"}} ></Spinner>
+
         </View>
     );
   }
@@ -1632,17 +1638,21 @@ get renderBottomContent(){
         <View style={ styles.bottomGoContainer }>
             <View style={ styles.inputTextContainer }>
              <Image source={ require("@Resources/Images/search-blue.png") } style={{marginLeft:8,marginRight:'3%',} }/>
-             <TouchableHighlight activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
+             <TouchableHighlight activeOpacity={ .5 }
                 onPress={() => {  this.setState({modalVisible: true,isDestinationSelected:false})}}>
+                  <View style={ styles.addressViewWrapper }>
                   <Text style={ styles.locationAddress} numberOfLines={1}>{ this.state.myLocationAddress } </Text>
+                  </View>
                 </TouchableHighlight>
             </View>
               <View style={{height:1,backgroundColor:'#4595fa'} }/>
               <View style={ styles.inputTextContainer }>
               <Image source={ require("@Resources/Images/destination-flag-blue.png") } style={{marginLeft:8,marginRight:'3%',}}/>
-              <TouchableHighlight activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
-              onPress={() => {  this.setState({modalVisible: true, isDestinationSelected:true})}}>
+              <TouchableHighlight activeOpacity={ .5 }
+              onPress={() => {this.setState({modalVisible: true, isDestinationSelected:true})}}>
+               <View style={ styles.addressViewWrapper }>
                 <Text style={ styles.locationAddress} numberOfLines={1}>{ this.state.destinationAddress } </Text>
+                </View>
               </TouchableHighlight>
               </View>
               <TouchableHighlight activeOpacity={ .5 } onPress={this.onGoButton.bind(this) }>

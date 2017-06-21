@@ -1,13 +1,14 @@
 import React, { Component , PropTypes,} from 'react';
 import {StyleSheet,View,Image,TextInput,Keyboard,Alert,Dimensions,TouchableOpacity,StatusBar,Platform,Text,} from 'react-native';
 var {GooglePlacesAutocomplete} = require('react-native-google-places-autocomplete');
-
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const ASPECT_RATIO = screenWidth / screenHeight;
 
 export default class AutoCompleteAddressModel extends Component {
   static defaultProps = {
      isVisible: false,
    };
-   
+
    static propTypes = {
      isVisible: PropTypes.bool,
      onSelect: PropTypes.func,
@@ -25,7 +26,7 @@ export default class AutoCompleteAddressModel extends Component {
   {
     return (
       <View style={{ flex:1 }}>
-           <View style={{height:20,backgroundColor:'rgba(38,164,206,1)'}}></View>
+           <View style={{height:0,backgroundColor:'rgba(38,164,206,1)'}}></View>
            <GooglePlacesAutocomplete
             placeholder='Search'
             istViewDisplayed='auto'
@@ -36,12 +37,13 @@ export default class AutoCompleteAddressModel extends Component {
             backgroundColor: 'rgba(0,0,0,0)',
             borderTopWidth: 0,
             borderBottomWidth:0,
-            marginTop:20
+            marginTop:20,
+            height:60,
           },
           textInput: {
             marginLeft: 0,
             marginRight: 0,
-            height: 38,
+            height: 40,
             color: '#5d5d5d',
             fontSize: 16
           },
@@ -94,12 +96,15 @@ export default class AutoCompleteAddressModel extends Component {
         }}
         filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']}
 
-        renderRightButton={() =>    <TouchableOpacity activeOpacity={ .5 } style={{alignItems: 'center',justifyContent: 'center',}}
+        renderRightButton={() =>
+          <TouchableOpacity activeOpacity={ .5 }
         onPress={() => {  if (!this.props.onCancel ||
           this.props.onCancel() !== false)
           {
           }}}>
-          <Text>Cancel</Text>
+          <View style={{justifyContent: 'center', alignItems: 'center',height:40,width:80,}}>
+          <Text style={{color:'#333333',fontSize:15,  textAlign:'center',}}>Cancel</Text>
+          </View>
         </TouchableOpacity>}
       />
 

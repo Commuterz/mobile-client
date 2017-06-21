@@ -84,8 +84,16 @@ const styles = StyleSheet.create({
   locationAddress: {
     fontFamily: 'Exo-Regular',
     fontSize: 17,
+    textAlign:'left',
+    width:screenWidth,
   },
-
+  addressViewWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    height: 44,
+    width:screenWidth,
+  },
   imageWrapper: {
     width: 54,
     justifyContent: 'center',
