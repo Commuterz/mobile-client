@@ -40,7 +40,7 @@ calltxStatusMethodForShop = function(tx,callback)
        else {
           console.log("not confirmed" );
           setTimeout(() => {
-            calltxStatusMethodForPassangerRequestARide(tx,function(err,result){
+            calltxStatusMethodForShop(tx,function(err,result){
               if(result === true)
               {
                  callback(err,result);

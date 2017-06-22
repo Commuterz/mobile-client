@@ -26,6 +26,9 @@ import webAPICall from '@API/webAPICall'
 import loginUserApiCall from '@API/loginUserApiCall'
 import AutoCompleteAddressModel from '@Components/AutoCompleteAddressModal'
 import RiderNotified from '@Components/RiderNotified'
+import RaffleNotification from '@Components/RaffleNotificationView'
+import RaffleEnded from '@Components/RaffleEndedView'
+
 import commonUtility from '@lib/commonUtility.js'
 import BackgroundGeolocation from 'react-native-mauron85-background-geolocation';
 import {getProfileData} from '@lib/constants'
@@ -146,9 +149,24 @@ export default class Home extends Component
       rideStartRoutePolyline:[],
       driverLastCurrentLocation :'',
       searchingForDriver:false,
-
       riderTimeToDestination:0,
       riderDistanceRemained:0,
+
+      //raffleStates
+      raffleTime:360 , //default 1 minute,
+      rafflePoolSize:'00',
+      raffleWinners1Prize:'',
+      raffleWinners2Prize:'',
+      raffleWinners3Prize:'',
+      raffleWinners4Prize:'',
+      raffleWinners5Prize:'',
+      raffleTotalWinners:'',
+      raffleTotalPrice:'0',
+      raffleParticipants:'0',
+      TimeToRaffleHours:'00',
+      TimeToRaffleMinutes:'00',
+      TimeToRaffleSeconds:'00',
+
 
     };
 }
@@ -320,6 +338,7 @@ onChangeLocation(text) {
 onChangeDesination(text) {
  this.setState({ destinationAddress: text });
 }
+
 /*************************Location******************************************************/
 componentWillMount(){
     this.checkCurrentScreenActiveToLoad();
@@ -353,6 +372,7 @@ checkCurrentScreenActiveToLoad(){
         }
    })
 }
+
 checkDriverFlow(){
   var self = this;
   AsyncStorage.getItem("driver", (errs,result) => {
@@ -371,6 +391,7 @@ checkDriverFlow(){
     }
   });
 }
+
 checkRiderFlow(){
   var self = this;
   AsyncStorage.getItem("rider", (errs,result) => {
@@ -526,46 +547,96 @@ fcmTokenAndNotificationHandling(){
 }
 
 showLocalNotificationForeground(notif) {
-  if(!this.state.isRiderApp){
-    if(notif.type === 'Ride request'){
-      Alert.alert( 'Ride Request', 'You have a new ride request.',
-        [{text: 'OK', onPress: () => this.updateDriverRideRequestData(notif)}, ],
-           { cancelable: false } )
-    }
-  }else if(notif.type === 'driver_msg'){
-      var body = JSON.parse(notif.body);
-       if(body.type === 'rideStartByDriver'){
-              Alert.alert('Driver Arrived', "Driver arrived to your location.");
-              this.setState({riderWaitingForPickUp:false});
-              this.setState({searchingForDriver:false});
-              this.setState({rideStartAndPickedUp:true});
-              AsyncStorage.setItem("rider","ride_start");
-             const timeoutId = BackgroundTimer.setTimeout(() => {
-              // this will be executed once after 10 seconds
-              // even when app is the the background
-            	  this.rideStartAtRiderSide(notif);
-              }, 10000);
-            // Cancel the timeout if necessary
-            BackgroundTimer.clearTimeout(timeoutId);
+   if(notif.type === 'Ride request'){
+     var body = JSON.parse(notif.body);
+     if(body.type === 'raffleNotifications'){
+       Alert.alert( 'Raffle Notification', 'Raffle is coming..',
+         [{text: 'OK', onPress: () => this.raffleComingNotifications(body)}, ],
+            { cancelable: false } )
+     }else if(body.type === 'rideRequest'){
+       if(!this.state.isRiderApp){
+         Alert.alert( 'Ride Request', 'You have a new ride request.',
+           [{text: 'OK', onPress: () => this.updateDriverRideRequestData(notif)}, ],
+              { cancelable: false } )
+       }
+     }
+   }else if(notif.type === 'driver_msg'){
+     var body = JSON.parse(notif.body);
+      if(body.type === 'rideStartByDriver'){
+             Alert.alert('Driver Arrived', "Driver arrived to your location.");
+             this.setState({riderWaitingForPickUp:false});
+             this.setState({searchingForDriver:false});
+             this.setState({rideStartAndPickedUp:true});
+             AsyncStorage.setItem("rider","ride_start");
+            const timeoutId = BackgroundTimer.setTimeout(() => {
+             // this will be executed once after 10 seconds
+             // even when app is the the background
+               this.rideStartAtRiderSide(notif);
+             }, 10000);
+           // Cancel the timeout if necessary
+           BackgroundTimer.clearTimeout(timeoutId);
 
-        }else if(body.type === 'rideAcceptByDriver'){
-            Alert.alert('Ride Accept', "Your requested ride is accepted");
-            this.setState({searchingForDriver:false});
-            this.setState({riderWaitingForPickUp:false});
-            this.rideAcceptViewToRider(notif);
-        }else if(body.type === 'driverEndRide'){
-          Alert.alert('Ride End', "Congratulations, you have reached to your destination.");
-          this.setState({riderWaitingForPickUp:false});
-          this.setState({searchingForDriver:false});
-          this.setState({rideStartAndPickedUp:false});
-          this.setState({rateRiderPopup:true});
-          AsyncStorage.setItem("rider","rate_driver");
+       }else if(body.type === 'rideAcceptByDriver'){
+           Alert.alert('Ride Accept', "Your requested ride is accepted");
+           this.setState({searchingForDriver:false});
+           this.setState({riderWaitingForPickUp:false});
+           this.rideAcceptViewToRider(notif);
+       }else if(body.type === 'driverEndRide'){
+         Alert.alert('Ride End', "Congratulations, you have reached to your destination.");
+         this.setState({riderWaitingForPickUp:false});
+         this.setState({searchingForDriver:false});
+         this.setState({rideStartAndPickedUp:false});
+         this.setState({rateRiderPopup:true});
+         AsyncStorage.setItem("rider","rate_driver");
 
-        }
-    }
-    //these clears notification from notification center/tray
-    FCM.removeAllDeliveredNotifications()
+       }
+   }
+
+  //these clears notification from notification center/tray
+  FCM.removeAllDeliveredNotifications()
 }
+raffleComingNotifications(notifData){
+  alert('here..1 '+notifData.timeToRaffle + "== " + notifData.winners[0].prize);
+  this.setState({raffleTime: notifData.timeToRaffle});
+  this.setState({raffleParticipants: notifData.totalParticipants});
+  this.setState({raffleTotalPrice: notifData.totalPrize});
+  this.setState({rafflePoolSize: notifData.poolSize});
+  this.setState({raffleTotalWinners:notifData.winners.length});
+  //prize Values
+  this.setState({raffleWinners1Prize: notifData.winners[0].prize});
+  this.setState({raffleWinners2Prize: notifData.winners[1].prize});
+  this.setState({raffleWinners3Prize: notifData.winners[2].prize});
+  this.setState({raffleWinners4Prize: notifData.winners[3].prize});
+  this.setState({raffleWinners5Prize: notifData.winners[4].prize});
+
+  // Start a timer that runs continuous after X milliseconds
+  const intervalId = BackgroundTimer.setInterval(() => {
+      // this will be executed every 200 ms
+      // even when app is the the background
+      this.calculateRaffleTime(timeStart,timeEnd);
+  }, 1000);
+}
+
+calculateRaffleTime(timeStart,timeEnd){
+  var duration = 60000;
+  var milliseconds = parseInt((duration%1000)/100)
+            , seconds = parseInt((duration/1000)%60)
+            , minutes = parseInt((duration/(1000*60))%60)
+            , hours = parseInt((duration/(1000*60*60))%24);
+
+  hours = (hours < 10) ? "0" + hours : hours;
+  minutes = (minutes < 10) ? "0" + minutes : minutes;
+  seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+  console.warn("hours" + minutes +  seconds)
+
+  this.setState({
+    TimeToRaffleHours : hours.toString(),
+    TimeToRaffleMinutes : minutes.toString(),
+    TimeToRaffleSeconds : seconds.toString(),
+  });
+}
+
 
 updateDriverRideRequestData(notif){
   //console.warn(JSON.stringify(notif));
@@ -757,6 +828,7 @@ rideApprovedByDriver(){
           }
    });
 }
+
 rideAcceptViewToRider(notif){
   AsyncStorage.setItem("rider","ride_accept_by_driver");
   if(notif === ''){
@@ -820,7 +892,8 @@ rideAcceptViewToRider(notif){
                 }
             }
      });
-  }else{
+  }
+  else{
       this.riderNotifiedDialog.show();
       var body = JSON.parse(notif.body);
       var driverCurrentLocation = body.source;
@@ -833,6 +906,7 @@ rideAcceptViewToRider(notif){
       var carName = body.driverCarName;
       var carPlateNumber = body.driverCarPlateNumber;
       var phoneNum = body.driverCallNumber;
+      this.setState({driverCurrentLocation:driverCurrentLocation})
       this.setState({riderWaitingForPickUp:false})
       this.setState({driverCarName:carName});
       this.setState({driverCarPlateNumber:carPlateNumber});
@@ -849,8 +923,7 @@ rideAcceptViewToRider(notif){
       AsyncStorage.setItem("driverProfilePic",driverProfilePic);
       AsyncStorage.setItem("riderTimeToDestination",timeToPickUp);
       AsyncStorage.setItem("riderDistanceRemained",distanceToPickUp);
-    }
-
+      }
 }
 
 rideStartAtRiderSide(notif){
@@ -959,6 +1032,7 @@ rideStartAtRiderSide(notif){
   }
 
 }
+
 /****************************End of Notification Part*********************************************************/
 
 /*******************************Rider Side Components Code*****************************************/
@@ -1183,7 +1257,7 @@ riderRequest(){
          rideId: this.state.rideId,
          riderId:'0x0fb374a56616bec8b8cb5a45bcd49e8e16b1abfb',
          riderProfileIPFS:this.state.userProfileIPFS,
-         //riderProfileData:this.state.loginUserData,
+         type:'rideRequest',
          riderName : this.state.loginName,
          riderProfilePic: this.state.loginProfilePic,
          riderFBId : this.state.loginFBID,
@@ -1298,8 +1372,24 @@ render()
                 }
           </MapView>
             { this.renderMyLocationButton }
+
           </View>
           { this.renderBottomContent }
+
+          <RaffleNotification
+            raffleTime = {this.state.raffleTime} rafflePoolSize = {this.state.rafflePoolSize}
+            raffleWinners1Prize = {this.state.raffleWinners1Prize}
+            raffleWinners2Prize = {this.state.raffleWinners2Prize}
+            raffleWinners3Prize = {this.state.raffleWinners3Prize}
+            raffleWinners4Prize = {this.state.raffleWinners4Prize}
+            raffleWinners5Prize = {this.state.raffleWinners5Prize}
+            raffleTotalWinners = {this.state.raffleTotalWinners}
+            raffleTotalPrice =    {this.state.raffleTotalPrice}
+            raffleParticipants = {this.state.raffleParticipants}
+            TimeToRaffleHours  ={this.state.TimeToRaffleHours}
+            TimeToRaffleMinutes ={this.state.TimeToRaffleMinutes}
+            TimeToRaffleSeconds ={this.state.TimeToRaffleSeconds} />
+
 
           <Modal visible={this.state.modalVisible} onRequestClose={() => {this.setState({modalVisible:false })}}>
               <AutoCompleteAddressModel onSelect = {(value) => {
@@ -1314,148 +1404,146 @@ render()
              onCancel ={()=>{this.setState({modalVisible:false });}} />
           </Modal>
 
-            <PopupDialog ref={(popupDialog) => { this.popupDialog = popupDialog; }}
-                closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="45%">
-              <View style={{flex: 1,flexDirection: 'column',}}>
-                    <View style={{alignItems:'center'}}>
-                    <Text style={styles.textSendRequestTitle}>Permission</Text>
-                    </View>
-               <View style={{  backgroundColor:'#4595fa',marginTop: 5, height:1.5,marginLeft:18,marginRight:18}}></View>
-                 <Text style={styles.textSendRequestOne}>By sending request you approve </Text>
-                 <View style={{flexDirection:'row' ,flex:1,justifyContent:'center',}}>
-                  <Text style={ styles.textSendRequestTwo }>of sending </Text>
-                   <Image source={ require("@Resources/Images/token.png") } style={{  width: 22,height: 22, marginTop:6, marginRight:3} }/>
-                   <Text style={ styles.textSendRequestTwo }>{this.state.routeCostToken} to Escrow.</Text>
-                 </View>
-                 <View style={{alignItems:'center',flexDirection: 'column', marginTop:-8,}}>
-                 <Text style={styles.textSendRequestApprove}>By Approving you agree to our</Text>
-                 <TouchableOpacity  onPress={this.openTermsDialog.bind(this)} >
-                  <Text style={styles.textSendRequestTerms}>Terms and Conditions</Text>
+          <PopupDialog ref={(popupDialog) => { this.popupDialog = popupDialog; }}
+              closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="45%">
+            <View style={{flex: 1,flexDirection: 'column',}}>
+                  <View style={{alignItems:'center'}}>
+                  <Text style={styles.textSendRequestTitle}>Permission</Text>
+                  </View>
+             <View style={{  backgroundColor:'#4595fa',marginTop: 5, height:1.5,marginLeft:18,marginRight:18}}></View>
+               <Text style={styles.textSendRequestOne}>By sending request you approve </Text>
+               <View style={{flexDirection:'row' ,flex:1,justifyContent:'center',}}>
+                <Text style={ styles.textSendRequestTwo }>of sending </Text>
+                 <Image source={ require("@Resources/Images/token.png") } style={{  width: 22,height: 22, marginTop:6, marginRight:3} }/>
+                 <Text style={ styles.textSendRequestTwo }>{this.state.routeCostToken} to Escrow.</Text>
+               </View>
+               <View style={{alignItems:'center',flexDirection: 'column', marginTop:-8,}}>
+               <Text style={styles.textSendRequestApprove}>By Approving you agree to our</Text>
+               <TouchableOpacity  onPress={this.openTermsDialog.bind(this)} >
+                <Text style={styles.textSendRequestTerms}>Terms and Conditions</Text>
+                </TouchableOpacity>
+               </View>
+              <View style={{flexDirection:'row' ,flex:1,justifyContent:'center', marginTop:20}}>
+               <View style ={styles.buttonSendRequestApprove}>
+                  <TouchableOpacity  onPress={this.approveRequestPopup.bind(this)} >
+                      <Text style={styles.popUpButtonText} > Approve </Text>
                   </TouchableOpacity>
-                 </View>
-                <View style={{flexDirection:'row' ,flex:1,justifyContent:'center', marginTop:20}}>
-                 <View style ={styles.buttonSendRequestApprove}>
-                    <TouchableOpacity  onPress={this.approveRequestPopup.bind(this)} >
-                        <Text style={styles.popUpButtonText} > Approve </Text>
-                    </TouchableOpacity>
-                  </View>
+                </View>
 
-                  <View style ={styles.buttonSendRequestDecline}>
-                     <TouchableHighlight  onPress={this.declineRequestPopup.bind(this)} >
-                         <Text style={styles.popUpButtonText} > Decline </Text>
-                     </TouchableHighlight>
-                   </View>
+                <View style ={styles.buttonSendRequestDecline}>
+                   <TouchableHighlight  onPress={this.declineRequestPopup.bind(this)} >
+                       <Text style={styles.popUpButtonText} > Decline </Text>
+                   </TouchableHighlight>
                  </View>
                </View>
-              </PopupDialog>
-
-
-            <PopupDialog
-                ref={(driverPopupDialog) => { this.driverPopupDialog = driverPopupDialog; }}
-                closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="45%">
-                <View style={{flex: 1,flexDirection: 'column',}}>
-                    <View style={{alignItems:'center'}}>
-                    <Text style={styles.textSendRequestTitle}>Permission</Text>
-                    </View>
-               <View style={{  backgroundColor:'#4595fa',marginTop: 5, height:1.5,marginLeft:18,marginRight:18}}></View>
-                 <Text style={styles.textSendRequestOne}>By sending request you approve </Text>
-                 <View style={{flexDirection:'row' ,flex:1,justifyContent:'center',}}>
-                  <Text style={ styles.textSendRequestTwo }>of sending </Text>
-                   <Image source={ require("@Resources/Images/token.png") } style={{  width: 22,height: 22, marginTop:6, marginRight:3} }/>
-                   <Text style={ styles.textSendRequestTwo }>{this.state.driverRideRequestCost} to Escrow.</Text>
-                 </View>
-
-                 <View style={{alignItems:'center',flexDirection: 'column', marginTop:-8,}}>
-                 <Text style={styles.textSendRequestApprove}>By Approving you agree to our</Text>
-                 <TouchableHighlight  onPress={this.openTermsDialog.bind(this)} >
-                  <Text style={styles.textSendRequestTerms}>Terms and Conditions</Text>
-                  </TouchableHighlight>
-                 </View>
-
-                <View style={{flexDirection:'row' ,flex:1,justifyContent:'center', marginTop:20}}>
-                 <View style ={styles.buttonSendRequestApprove}>
-                    <TouchableHighlight  onPress={this.approveRideRequestPopup.bind(this)} >
-                        <Text style={styles.popUpButtonText} > Approve </Text>
-                    </TouchableHighlight>
-                  </View>
-
-                  <View style ={styles.buttonSendRequestDecline}>
-                     <TouchableHighlight  onPress={this.declineRideRequestPopup.bind(this)} >
-                         <Text style={styles.popUpButtonText} > Decline </Text>
-                     </TouchableHighlight>
-                   </View>
-                 </View>
-               </View>
-              </PopupDialog>
-
-            <PopupDialog
-                   ref={(riderNotifiedDialog) => { this.riderNotifiedDialog = riderNotifiedDialog;}}
-                   style={{backgroundColor:'rgba(0, 0, 0, 0.75'}}
-                   closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="50%">
-              <View style={{flex: 1,flexDirection: 'column'}}>
-                 <View style={styles.popup_bg_sub_view1}>
-                    <Text style={ styles.congratulations_text }>Congratulations!</Text>
-                    <View style={styles.user_bg_view}>
-                        <Image source = {{uri:this.state.driverProfilePic}} style={styles.user_image}></Image>
-                      <View style={styles.user_address_view}>
-                        <Text style={ styles.user_name_text }>{this.state.driverFullName}</Text>
-                        <Text style={ styles.user_address_text }>{this.state.driverCarName}</Text>
-                        <Text style={ styles.user_address_text }>Plate Number:{this.state.driverCarPlateNumber}</Text>
-                      </View>
-                    </View>
-                    <Text style={ styles.pickup_text }>Will Pick You Up</Text>
-                 </View>
-                 <View style={styles.popup_bg_sub_view2}>
-                    <View style={styles.call_view}>
-                      <TouchableOpacity onPress={this.callDriver.bind(this)}>
-                        <Text style={ styles.call_text }>Call {this.state.driverName}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.close_View}>
-                      <TouchableOpacity onPress={this.closeRiderNotifiedDialog.bind(this)}>
-                        <Text style={styles.close_text}>Close</Text>
-                      </TouchableOpacity>
-                    </View>
-                 </View>
-
-              </View>
-
+             </View>
             </PopupDialog>
 
-
-              <PopupDialog  ref={(termsConditionDialog) => { this.termsConditionDialog = termsConditionDialog;}}
-               closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="95%" height="95%">
-               <View style={{flexDirection:'column',}}>
-               <View style={{height:50,justifyContent:'center',alignItems:'center',flexDirection:'row',backgroundColor:'#4595fa',}}>
-                  <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:18,color:'#FFF'}}>Terms and Conditions </Text>
-                  <View style={{right:5,position:'absolute'}}>
-                  <TouchableHighlight onPress={this.closeTermsDialog.bind(this)}>
-                   <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:16,color:'#FFF'}}>Close</Text>
-                   </TouchableHighlight>
-                   </View>
-                 </View>
-                  <View style={{width:'100%',height:'100%'}}>
-                    <WebView
-                      source={{uri: 'https://www.commuterz.io/'}}
-                      javaScriptEnabled={true}
-                      domStorageEnabled={true}
-                      startInLoadingState={true}
-                    />
+          <PopupDialog
+              ref={(driverPopupDialog) => { this.driverPopupDialog = driverPopupDialog; }}
+              closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="45%">
+              <View style={{flex: 1,flexDirection: 'column',}}>
+                  <View style={{alignItems:'center'}}>
+                  <Text style={styles.textSendRequestTitle}>Permission</Text>
                   </View>
+             <View style={{  backgroundColor:'#4595fa',marginTop: 5, height:1.5,marginLeft:18,marginRight:18}}></View>
+               <Text style={styles.textSendRequestOne}>By sending request you approve </Text>
+               <View style={{flexDirection:'row' ,flex:1,justifyContent:'center',}}>
+                <Text style={ styles.textSendRequestTwo }>of sending </Text>
+                 <Image source={ require("@Resources/Images/token.png") } style={{  width: 22,height: 22, marginTop:6, marginRight:3} }/>
+                 <Text style={ styles.textSendRequestTwo }>{this.state.driverRideRequestCost} to Escrow.</Text>
+               </View>
 
+               <View style={{alignItems:'center',flexDirection: 'column', marginTop:-8,}}>
+               <Text style={styles.textSendRequestApprove}>By Approving you agree to our</Text>
+               <TouchableHighlight  onPress={this.openTermsDialog.bind(this)} >
+                <Text style={styles.textSendRequestTerms}>Terms and Conditions</Text>
+                </TouchableHighlight>
+               </View>
+
+              <View style={{flexDirection:'row' ,flex:1,justifyContent:'center', marginTop:20}}>
+               <View style ={styles.buttonSendRequestApprove}>
+                  <TouchableHighlight  onPress={this.approveRideRequestPopup.bind(this)} >
+                      <Text style={styles.popUpButtonText} > Approve </Text>
+                  </TouchableHighlight>
                 </View>
-              </PopupDialog>
 
-            <Spinner visible={this.state.loaderVisible} overlayColor={ "rgba(0, 0, 0, 0.50)" }/>
+                <View style ={styles.buttonSendRequestDecline}>
+                   <TouchableHighlight  onPress={this.declineRideRequestPopup.bind(this)} >
+                       <Text style={styles.popUpButtonText} > Decline </Text>
+                   </TouchableHighlight>
+                 </View>
+               </View>
+             </View>
+            </PopupDialog>
 
-            <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={ this.state.calculatingRoute }>
-              <View style={ styles.calculatingRouteContainer }>
-                <Image source={ require("@Resources/Images/calculating-route.png") } style={ styles.imageCalculatingRoute }/>
+          <PopupDialog
+                 ref={(riderNotifiedDialog) => { this.riderNotifiedDialog = riderNotifiedDialog;}}
+                 style={{backgroundColor:'rgba(0, 0, 0, 0.75'}}
+                 closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="90%" height="50%">
+            <View style={{flex: 1,flexDirection: 'column'}}>
+               <View style={styles.popup_bg_sub_view1}>
+                  <Text style={ styles.congratulations_text }>Put Your Hat On..</Text>
+                  <View style={styles.user_bg_view}>
+                      <Image source = {{uri:this.state.driverProfilePic}} style={styles.user_image}></Image>
+                    <View style={styles.user_address_view}>
+                      <Text style={ styles.user_name_text }>{this.state.driverFullName}</Text>
+                      <Text style={ styles.user_address_text }>{this.state.driverCarName}</Text>
+                      <Text style={ styles.user_address_text }>Plate Number:{this.state.driverCarPlateNumber}</Text>
+                    </View>
+                  </View>
+                  <Text style={ styles.pickup_text }>Will Pick You Up</Text>
+               </View>
+               <View style={styles.popup_bg_sub_view2}>
+                  <View style={styles.call_view}>
+                    <TouchableOpacity onPress={this.callDriver.bind(this)}>
+                      <Text style={ styles.call_text }>Call {this.state.driverName}</Text>
+                      </TouchableOpacity>
+                  </View>
+                  <View style={styles.close_View}>
+                    <TouchableOpacity onPress={this.closeRiderNotifiedDialog.bind(this)}>
+                      <Text style={styles.close_text}>Close</Text>
+                    </TouchableOpacity>
+                  </View>
+               </View>
+
+            </View>
+
+          </PopupDialog>
+
+          <PopupDialog  ref={(termsConditionDialog) => { this.termsConditionDialog = termsConditionDialog;}}
+             closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="95%" height="95%">
+             <View style={{flexDirection:'column',}}>
+             <View style={{height:50,justifyContent:'center',alignItems:'center',flexDirection:'row',backgroundColor:'#4595fa',}}>
+                <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:18,color:'#FFF'}}>Terms and Conditions </Text>
+                <View style={{right:5,position:'absolute'}}>
+                <TouchableHighlight onPress={this.closeTermsDialog.bind(this)}>
+                 <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:16,color:'#FFF'}}>Close</Text>
+                 </TouchableHighlight>
+                 </View>
+               </View>
+                <View style={{width:'100%',height:'100%'}}>
+                  <WebView
+                    source={{uri: 'https://www.commuterz.io/'}}
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    startInLoadingState={true}
+                  />
+                </View>
+
               </View>
-            </Spinner>
+          </PopupDialog>
 
-            <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={this.state.loadingWithText}
-             textContent={"Please wait.."} textStyle={{color: '#FFF',fontSize:16,fontFamily:"Exo-Regular"}} ></Spinner>
+          <Spinner visible={this.state.loaderVisible} overlayColor={ "rgba(0, 0, 0, 0.50)" }/>
+
+          <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={ this.state.calculatingRoute }>
+            <View style={ styles.calculatingRouteContainer }>
+              <Image source={ require("@Resources/Images/calculating-route.png") } style={ styles.imageCalculatingRoute }/>
+            </View>
+          </Spinner>
+
+          <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={this.state.loadingWithText}
+           textContent={"Please wait.."} textStyle={{color: '#FFF',fontSize:16,fontFamily:"Exo-Regular"}} ></Spinner>
 
         </View>
     );

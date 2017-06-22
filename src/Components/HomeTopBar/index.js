@@ -53,7 +53,7 @@ onShop() {
 
 render() {
     const {tokenBalance,loginProfilePic,source, children, style, ...props} = this.props
-    //console.warn('image' +loginProfilePic );
+
     let pic = {
       uri: loginProfilePic,
    };

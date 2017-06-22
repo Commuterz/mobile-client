@@ -121,10 +121,9 @@ logoutFromFacebook(){
 
 registerUser(){
   NetInfo.isConnected.fetch().then(isConnected => {
-     console.log('First, is ' + (isConnected ? 'online' : 'offline'));
     if(isConnected){
       var self =this;
-      console.warn('userpas'+userPassword);
+      //console.warn('userpas'+userPassword);
       userPrivateKey = api.getPrivateKey(userPassword, userSalt);
       userEthereumAddress = api.privateKeyToAddress(userPrivateKey);
       AsyncStorage.setItem("userPrivateKey", userPrivateKey)

@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,ScrollView} from 'react-native';
 import styles from './styles'
+import BackgroundImage from '@Components/BackgroundImage'
 import BackgroundTimer from 'react-native-background-timer';
 
+var time ='';
 class RaffleNotification extends Component
 {
   constructor(props){
@@ -14,7 +16,8 @@ class RaffleNotification extends Component
     };
   }
   componentWillMount() {
-    this.StartRaffleTimer();
+
+    //this.StartRaffleTimer();
   }
 
   calculateTimerValue()
@@ -45,6 +48,7 @@ class RaffleNotification extends Component
 
    StartRaffleTimer()
     {
+
       // Start a timer that runs continuous after X milliseconds
       const intervalId = BackgroundTimer.setInterval(() => {
           // this will be executed every 200 ms
@@ -55,20 +59,25 @@ class RaffleNotification extends Component
 
   render()
   {
+    const {TimeToRaffleHours,TimeToRaffleMinutes,TimeToRaffleSeconds,rafflePoolSize,raffleWinners1Prize,raffleWinners2Prize,raffleWinners3Prize,
+      raffleWinners4Prize,  raffleWinners5Prize,raffleTotalWinners,raffleTotalPrice, raffleParticipants,
+      source, children, style, ...props} = this.props
+
     return (
+
       <View style={styles.container}>
-        <Image source = {require("@Resources/Images/raffle_notification_bg_main.png")} style={styles.bg_image}>
-        </Image>
-        <Image source = {require("@Resources/Images/raffle_notification_bg.png")} style={styles.bg_image}>
-        </Image>
-        <Image source = {require("@Resources/Images/coins_bg.png")} style={styles.bg_pool_coin}>
-        </Image>
+      <Image source = {require("@Resources/Images/raffle_notification_bg_main.png")} style={styles.bg_image}>
+      </Image>
+      <Image source = {require("@Resources/Images/raffle_notification_bg.png")} style={styles.bg_image}>
+      </Image>
+      <Image source = {require("@Resources/Images/coins_bg.png")} style={styles.bg_pool_coin}>
+      </Image>
         <ScrollView>
         <View style = {styles.timer_view}>
           <Text style={styles.time_remained_text}>Time Remained to Raffle!</Text>
           <View style={ [styles.fieldNameContainer, { justifyContent: 'space-around' }] }>
             <View style={ styles.timeFieldContainer }>
-              <Text style={ styles.textTimeValue }>{this.state.TimeToRaffleHours}</Text>
+              <Text style={ styles.textTimeValue }>{TimeToRaffleHours}</Text>
               <Text style={ styles.textTimeLabel }>HRS</Text>
             </View>
             <View>
@@ -76,7 +85,7 @@ class RaffleNotification extends Component
               <Text style={ styles.textTimeLabel }></Text>
             </View>
             <View style={ styles.timeFieldContainer }>
-              <Text style={ styles.textTimeValue }>{this.state.TimeToRaffleMinutes}</Text>
+              <Text style={ styles.textTimeValue }>{TimeToRaffleMinutes}</Text>
               <Text style={ styles.textTimeLabel }>MNS</Text>
             </View>
             <View>
@@ -84,7 +93,7 @@ class RaffleNotification extends Component
               <Text style={ styles.textTimeLabel }></Text>
             </View>
             <View style={ styles.timeFieldContainer }>
-              <Text style={ styles.textTimeValue }>{this.state.TimeToRaffleSeconds}</Text>
+              <Text style={ styles.textTimeValue }>{TimeToRaffleSeconds}</Text>
               <Text style={ styles.textTimeLabel }>SEC</Text>
             </View>
           </View>
@@ -94,7 +103,7 @@ class RaffleNotification extends Component
           <View style={ [styles.pull_size_container, { justifyContent: 'center' }] }>
             <Image source = {require("@Resources/Images/token_big.png")}>
             </Image>
-            <Text style={styles.pull_size_value_text}>4800</Text>
+            <Text style={styles.pull_size_value_text}>{rafflePoolSize}</Text>
           </View>
         </View>
         <View style = {{flex:1}}>
@@ -105,7 +114,7 @@ class RaffleNotification extends Component
             <View style = {styles.participants_sub_view}>
               <Image source = {require("@Resources/Images/person.png")}>
               </Image>
-              <Text style={styles.participants_text}>200</Text>
+              <Text style={styles.participants_text}>{raffleParticipants}</Text>
             </View >
           </View>
           <View style = {styles.participants__view}>
@@ -113,7 +122,7 @@ class RaffleNotification extends Component
             <View style = {styles.participants_sub_view}>
               <Image source = {require("@Resources/Images/winner_icon.png")}>
               </Image>
-              <Text style={styles.participants_text}>5</Text>
+              <Text style={styles.participants_text}>{raffleTotalWinners}</Text>
             </View >
           </View>
         </View>
@@ -127,7 +136,7 @@ class RaffleNotification extends Component
               <View style = {styles.first_price_coin_view}>
                 <Image source = {require("@Resources/Images/token.png")}>
                 </Image>
-                <Text style={styles.first_price_coin_text}>3000</Text>
+                <Text style={styles.first_price_coin_text}>{raffleWinners1Prize}</Text>
               </View>
             </View>
           </View>
@@ -143,7 +152,7 @@ class RaffleNotification extends Component
                 <View style = {styles.other_price_coin_view}>
                   <Image source = {require("@Resources/Images/token-copy-3.png")}>
                   </Image>
-                  <Text style={styles.other_price_coin_text}>1000</Text>
+                  <Text style={styles.other_price_coin_text}>{raffleWinners2Prize}</Text>
                 </View>
               </View>
             </View>
@@ -156,7 +165,7 @@ class RaffleNotification extends Component
                 <View style = {styles.other_price_coin_view}>
                   <Image source = {require("@Resources/Images/token-copy-3.png")}>
                   </Image>
-                  <Text style={styles.other_price_coin_text}>500</Text>
+                  <Text style={styles.other_price_coin_text}>{raffleWinners3Prize}</Text>
                 </View>
               </View>
             </View>
@@ -171,7 +180,7 @@ class RaffleNotification extends Component
                 <View style = {styles.other_price_coin_view}>
                   <Image source = {require("@Resources/Images/token-copy-3.png")}>
                   </Image>
-                  <Text style={styles.other_price_coin_text}>200</Text>
+                  <Text style={styles.other_price_coin_text}>{raffleWinners4Prize}</Text>
                 </View>
               </View>
             </View>
@@ -184,7 +193,7 @@ class RaffleNotification extends Component
                 <View style = {styles.other_price_coin_view}>
                   <Image source = {require("@Resources/Images/token-copy-3.png")}>
                   </Image>
-                  <Text style={styles.other_price_coin_text}>100</Text>
+                  <Text style={styles.other_price_coin_text}>{raffleWinners5Prize}</Text>
                 </View>
               </View>
             </View>
@@ -192,7 +201,13 @@ class RaffleNotification extends Component
         </View>
         </ScrollView>
       </View>
+
     )
   }
+}
+RaffleNotification.propTypes = {
+  source: React.PropTypes.number,
+  children: React.PropTypes.object,
+  style: React.PropTypes.object
 }
 export default RaffleNotification
