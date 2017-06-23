@@ -1,20 +1,20 @@
 import { StyleSheet, Platform,Dimensions } from 'react-native'
-const { width: screenWidth, height: screenHiehgt } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 /* Styles ==================================================================== */
 const styles = StyleSheet.create({
 
   container: {
-    height: screenHiehgt-80,
+    height: screenHeight,
     width: screenWidth,
     left: 0,
     right: 0,
-    top: 80,
+    top: '9%',
     bottom: 0,
     position:'absolute'
   },
   bg_image: {
-    height: screenHiehgt-80,
+    height: screenHeight,
     width: screenWidth,
     left: 0,
     right: 0,
@@ -31,16 +31,15 @@ const styles = StyleSheet.create({
     position:'absolute'
   },
   popup_bg_view: {
-    height: 340,
+    height: '60%',
     width: screenWidth-40,
     left: 20,
     right: 20,
-    top:70,
+    top:'12%',
     position:'absolute',
     alignItems: 'center',
   },
   popup_bg: {
-    height: 340,
     width: screenWidth-40,
     left: 0,
     right: 0,
@@ -51,38 +50,46 @@ const styles = StyleSheet.create({
   hurry_text:{
      fontFamily: 'Exo-Bold',
      fontSize: 38,
-     fontWeight: 'bold',
      color: '#ffffff',
-     backgroundColor:'transparent',
      textAlign :'center',
-     marginTop : 10,
+     marginTop : 15,
   },
   user_view: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:10,
   },
-  user_image: {
+  avatarWrapper: {
     height: 40,
     width: 40,
+    borderRadius: 23,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight:5
   },
+  imageAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 23,
+    marginLeft:1
+  },
+
   user_name_text:{
-     fontFamily: 'Exo-Bold',
+     fontFamily: 'Exo-Medium',
      fontSize: 23,
-     fontWeight: 'bold',
      color: '#ffffff',
-     backgroundColor:'transparent',
+     fontStyle :'italic',
      textAlign :'center',
      marginLeft:5,
   },
   price_text:{
      fontFamily: 'Exo-Bold',
      fontSize: 23,
-     fontWeight: 'bold',
      color: '#ffffff',
-     backgroundColor:'transparent',
      textAlign :'center',
-     marginTop:5,
+     marginTop:15,
   },
   coin_bg_view: {
     height: 78,
@@ -112,7 +119,6 @@ const styles = StyleSheet.create({
   coin_text:{
      fontFamily: 'Exo-Bold',
      fontSize: 52,
-     fontWeight: 'bold',
      color: '#fcea61',
      backgroundColor:'transparent',
      textAlign :'center',
@@ -129,7 +135,6 @@ const styles = StyleSheet.create({
   collect_text:{
      fontFamily: 'Exo-Medium',
      fontSize: 22,
-     fontWeight: '500',
      color: '#ffffff',
      backgroundColor:'transparent',
      textAlign :'center',

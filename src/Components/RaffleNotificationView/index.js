@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,ScrollView} from 'react-native';
+import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,TouchableHighlight,Alert,ScrollView} from 'react-native';
 import styles from './styles'
 import BackgroundImage from '@Components/BackgroundImage'
 import BackgroundTimer from 'react-native-background-timer';
@@ -46,7 +46,7 @@ class RaffleNotification extends Component
       });
   }
 
-   StartRaffleTimer()
+  StartRaffleTimer()
     {
 
       // Start a timer that runs continuous after X milliseconds
@@ -57,9 +57,18 @@ class RaffleNotification extends Component
       }, 1000);
     }
 
+  closeRaffleView(){
+    //alert('close');
+    this.props.closeRaffleViewCall();
+  }
+
+ static propTypes = {
+    closeRaffleViewCall: React.PropTypes.func.isRequired,
+  };
+
   render()
   {
-    const {TimeToRaffleHours,TimeToRaffleMinutes,TimeToRaffleSeconds,rafflePoolSize,raffleWinners1Prize,raffleWinners2Prize,raffleWinners3Prize,
+    const {raffleTime,TimeToRaffleHours,TimeToRaffleMinutes,TimeToRaffleSeconds,rafflePoolSize,raffleWinners1Prize,raffleWinners2Prize,raffleWinners3Prize,
       raffleWinners4Prize,  raffleWinners5Prize,raffleTotalWinners,raffleTotalPrice, raffleParticipants,
       source, children, style, ...props} = this.props
 
@@ -72,7 +81,15 @@ class RaffleNotification extends Component
       </Image>
       <Image source = {require("@Resources/Images/coins_bg.png")} style={styles.bg_pool_coin}>
       </Image>
-        <ScrollView>
+        <ScrollView style={{width:'100%',height:'100%'}}>
+        <View style={{width:'100%',height:'100%',}}>
+        <TouchableHighlight  onPress={this.closeRaffleView.bind(this)}>
+          <View style={{width:'100%',flexDirection:'row',justifyContent:'center',alignItems:'center',marginTop:5}}>
+          <Image source = {require("@Resources/Images/close.png")} style={{width:34,height:34}}>
+          </Image>
+          <Text style={{fontSize:16,color:'#FFF',fontFamily:'Exo-Regular',textAlign:'center'}}>Close</Text>
+          </View>
+        </TouchableHighlight >
         <View style = {styles.timer_view}>
           <Text style={styles.time_remained_text}>Time Remained to Raffle!</Text>
           <View style={ [styles.fieldNameContainer, { justifyContent: 'space-around' }] }>
@@ -126,78 +143,92 @@ class RaffleNotification extends Component
             </View >
           </View>
         </View>
-        <View style = {styles.bottom_view}>
+
+         <View style={{width:'100%',height:285,backgroundColor:'rgba(0, 0, 0, 0.71)'}}>
+
           <View style = {styles.bottom_price_view}>
             <Image source = {require("@Resources/Images/trophy.png")}>
-              <Text style={styles.first_price_text}>1</Text>
-            </Image>
+               <Text style={styles.first_price_text}>1</Text>
+             </Image>
             <View style = {styles.first_price_text_view}>
-              <Text style={styles.first_price_text1}>1st Prize</Text>
-              <View style = {styles.first_price_coin_view}>
-                <Image source = {require("@Resources/Images/token.png")}>
-                </Image>
-                <Text style={styles.first_price_coin_text}>{raffleWinners1Prize}</Text>
-              </View>
+               <Text style={styles.first_price_text1}>1st Prize</Text>
+               <View style = {styles.first_price_coin_view}>
+                 <Image source = {require("@Resources/Images/token.png")}>
+                 </Image>
+                 <Text style={styles.first_price_coin_text}>{raffleWinners1Prize}</Text>
+               </View>
             </View>
-          </View>
-          <View style={styles.seperator}/>
+           </View>
 
-          <View style = {styles.other_price_container__main_view}>
+           <View style={styles.seperator}/>
+
+           <View style = {styles.other_price_container__main_view}>
+             <View style = {styles.other_price_container_view}>
+                 <Image source = {require("@Resources/Images/rank.png")}>
+                   <Text style={styles.other_price_text}>2</Text>
+                 </Image>
+                 <View style = {styles.other_price_text_view}>
+                    <Text style={styles.first_price_text1}>2nd Prize</Text>
+                  <View style = {styles.other_price_coin_view}>
+                     <Image source = {require("@Resources/Images/token-copy-3.png")}>
+                     </Image>
+                     <Text style={styles.other_price_coin_text}>{raffleWinners2Prize}</Text>
+               </View>
+             </View>
+            </View>
+
             <View style = {styles.other_price_container_view}>
-              <Image source = {require("@Resources/Images/rank.png")}>
-                <Text style={styles.other_price_text}>2</Text>
-              </Image>
-              <View style = {styles.other_price_text_view}>
-                <Text style={styles.first_price_text1}>2nd Prize</Text>
-                <View style = {styles.other_price_coin_view}>
-                  <Image source = {require("@Resources/Images/token-copy-3.png")}>
-                  </Image>
-                  <Text style={styles.other_price_coin_text}>{raffleWinners2Prize}</Text>
-                </View>
+                <Image source = {require("@Resources/Images/rank.png")}>
+                  <Text style={styles.other_price_text}>2</Text>
+                </Image>
+                <View style = {styles.other_price_text_view}>
+                   <Text style={styles.first_price_text1}>3rd Prize</Text>
+                 <View style = {styles.other_price_coin_view}>
+                    <Image source = {require("@Resources/Images/token-copy-3.png")}>
+                    </Image>
+                    <Text style={styles.other_price_coin_text}>{raffleWinners3Prize}</Text>
               </View>
             </View>
-            <View style = {styles.other_price_container_view}>
-              <Image source = {require("@Resources/Images/rank.png")}>
-                <Text style={styles.other_price_text}>3</Text>
-              </Image>
-              <View style = {styles.other_price_text_view}>
-                <Text style={styles.first_price_text1}>3rd Prize</Text>
-                <View style = {styles.other_price_coin_view}>
-                  <Image source = {require("@Resources/Images/token-copy-3.png")}>
-                  </Image>
-                  <Text style={styles.other_price_coin_text}>{raffleWinners3Prize}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-          <View style = {styles.other_price_container__main_view}>
-            <View style = {styles.other_price_container_view}>
-              <Image source = {require("@Resources/Images/rank.png")}>
-                <Text style={styles.other_price_text}>4</Text>
-              </Image>
-              <View style = {styles.other_price_text_view}>
-                <Text style={styles.first_price_text1}>4th Prize</Text>
-                <View style = {styles.other_price_coin_view}>
-                  <Image source = {require("@Resources/Images/token-copy-3.png")}>
-                  </Image>
-                  <Text style={styles.other_price_coin_text}>{raffleWinners4Prize}</Text>
-                </View>
-              </View>
-            </View>
-            <View style = {styles.other_price_container_view}>
-              <Image source = {require("@Resources/Images/rank.png")}>
-                <Text style={styles.other_price_text}>5</Text>
-              </Image>
-              <View style = {styles.other_price_text_view}>
-                <Text style={styles.first_price_text1}>5th Prize</Text>
-                <View style = {styles.other_price_coin_view}>
-                  <Image source = {require("@Resources/Images/token-copy-3.png")}>
-                  </Image>
-                  <Text style={styles.other_price_coin_text}>{raffleWinners5Prize}</Text>
-                </View>
-              </View>
             </View>
           </View>
+          <View style = {styles.other_price_container__main_view}>
+            <View style = {styles.other_price_container_view}>
+                <Image source = {require("@Resources/Images/rank.png")}>
+                  <Text style={styles.other_price_text}>2</Text>
+                </Image>
+                <View style = {styles.other_price_text_view}>
+                   <Text style={styles.first_price_text1}>4th Prize</Text>
+                 <View style = {styles.other_price_coin_view}>
+                    <Image source = {require("@Resources/Images/token-copy-3.png")}>
+                    </Image>
+                    <Text style={styles.other_price_coin_text}>{raffleWinners4Prize}</Text>
+              </View>
+            </View>
+           </View>
+
+           <View style = {styles.other_price_container_view}>
+               <Image source = {require("@Resources/Images/rank.png")}>
+                 <Text style={styles.other_price_text}>2</Text>
+
+               </Image>
+               <View style = {styles.other_price_text_view}>
+                  <Text style={styles.first_price_text1}>5th Prize</Text>
+                <View style = {styles.other_price_coin_view}>
+                   <Image source = {require("@Resources/Images/token-copy-3.png")}>
+                   </Image>
+                   <Text style={styles.other_price_coin_text}>{raffleWinners5Prize}</Text>
+             </View>
+           </View>
+           </View>
+          </View>
+
+
+
+
+
+         </View>
+
+
         </View>
         </ScrollView>
       </View>

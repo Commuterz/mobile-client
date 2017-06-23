@@ -11,7 +11,6 @@ container: {
   right: 0,
   top: '9%',
   bottom: 0,
-  backgroundColor:'red',
   position:'absolute'
 },
 bg_image: {
@@ -140,7 +139,6 @@ participants_sub_view: {
   alignItems: 'center',
 },
 bottom_view: {
-  bottom:0,
   width: screenWidth,
   backgroundColor:'rgba(0, 0, 0, 0.71)',
 },
@@ -188,17 +186,19 @@ seperator: {
   top: 0,
   backgroundColor:'white',
 },
+
 other_price_container__main_view: {
   justifyContent: 'center',
   alignItems: 'center',
   flexDirection: 'row',
+  width:screenWidth,
+  height: 65,
 },
 other_price_container_view: {
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexDirection: 'row',
   flex:1,
-  height:70
+  flexDirection:'row',
+  justifyContent:'center',
+  alignItems:'center'
 },
 other_price_text:{
    fontFamily: 'Exo-Bold',

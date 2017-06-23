@@ -66,7 +66,7 @@ var userPic = 'https://addons.cdn.mozilla.net/static//img/zamboni/anon_user.png'
 var refreshIntervalId=null;
 var rideStartLocationInterval = null;
 var typeToLoad ='';
-let html = '<div id="myContent">This is my name</div>';
+const DEFAULT_PADDING = { top: 60, right: 60, bottom: 60, left: 60 };
 export default class Home extends Component
 {
   constructor(props) {
@@ -153,7 +153,8 @@ export default class Home extends Component
       riderDistanceRemained:0,
 
       //raffleStates
-      raffleTime:360 , //default 1 minute,
+      raffleNotificationView:false,
+      raffleTime:'00:00:00' , //default 1 minute,
       rafflePoolSize:'00',
       raffleWinners1Prize:'',
       raffleWinners2Prize:'',
@@ -166,10 +167,13 @@ export default class Home extends Component
       TimeToRaffleHours:'00',
       TimeToRaffleMinutes:'00',
       TimeToRaffleSeconds:'00',
-
+      isWinnerDeclare:false,
+      raffleWinnerView:false,
 
     };
 }
+
+
 
 componentDidMount() {
    AsyncStorage.getItem("userPrivateKey", (errs,result) => {
@@ -186,11 +190,7 @@ componentDidMount() {
              }
           }
      });
-     if (Platform.OS === 'android') {
-        this.checkAndroidDeviceLocationEnabled();
-     } else {
-        this.onMoveMyLocation();
-     }
+
   this.fcmTokenAndNotificationHandling();
  }
 /*************************Location******************************************************/
@@ -211,46 +211,14 @@ checkPermissionAndroid(){
   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION)
     .then(granted => {
       if (granted){
-        navigator.geolocation.getCurrentPosition((position) => {
-                 //let initialPosition = JSON.stringify(position);
-                 let myPosition = {latitude: position.coords.latitude,longitude: position.coords.longitude,};
-                 this.setState({currentLocation: myPosition, myLocationAddress: position.coords.latitude.toString()+ ' ,' + position.coords.longitude.toString()});
-                 this.setState({driverCurrentLocation:myPosition});
-                 this.setState({region:{latitude:position.coords.latitude,longitude:position.coords.longitude,
-                                latitudeDelta: 0.0922,longitudeDelta: 0.0421}});
-                this._addressFromCoordinates(position.coords.latitude,position.coords.longitude);
-                this.updateLastLocationOfDriver(myPosition);
-
-        }, error => Alert.alert('Alert','Unable to get your location please try tap on location icon. \n'+ JSON.stringify(error)), { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 });
+        this.getCurrentLocation();
       }else {
         Alert.alert('Alert','Seems your location is disabled. Allow location from Settings --> App --> Permission')
       }
     });
 }
 
-updateLastLocationOfDriver(myPosition){
-  AsyncStorage.getItem("lastLocation", (errs,result) => {
-       if (!errs) {
-           if (result !== null) {
-             var data = JSON.parse(result);
-             var lastLat = data.latitude;
-             var lastlon = data.longitude;
-             commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
-               myPosition.latitude,myPosition.longitude,function(distance){
-               if(distance >= 1){
-                  AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
-                  AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
-                  AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
-               }
-             });
-           }else{
-             AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
-           }
-        }
-   });
-}
-
-onMoveMyLocation() {
+/*onMoveMyLocation() {
   navigator.geolocation.getCurrentPosition( (position) => {
       let myPosition = {latitude: position.coords.latitude,longitude: position.coords.longitude,};
       this.setState({currentLocation: myPosition, myLocationAddress: position.coords.latitude.toString()+ ' ,' + position.coords.longitude.toString()});
@@ -275,7 +243,7 @@ onMoveMyLocation() {
      this.updateLastLocationOfDriver(myPosition);
      this._addressFromCoordinates(position.coords.latitude,position.coords.longitude);
     });
-}
+}*/
 
 /**Getting Address from latitude and longitude @author SynsoftGlobal******/
 _addressFromCoordinates(lat,lng){
@@ -341,8 +309,16 @@ onChangeDesination(text) {
 
 /*************************Location******************************************************/
 componentWillMount(){
+  var self = this;
     this.checkCurrentScreenActiveToLoad();
-  NetInfo.isConnected.fetch().then(isConnected => {
+    AsyncStorage.getItem("currentBalance",(err,balance) => {
+      if(!err){
+        if(balance !== null){
+          this.setState({tokenBalance:balance.toString()});
+        }
+      }
+    });
+    NetInfo.isConnected.fetch().then(isConnected => {
      console.log('First, is ' + (isConnected ? 'online' : 'offline'));
      if(isConnected){
       //this.setState({loadingWithText:true});
@@ -352,6 +328,116 @@ componentWillMount(){
        Alert.alert('Alert','No internet connections found. Please connect and try again.')
      }
   });
+  if (Platform.OS === 'android') {
+     this.checkAndroidDeviceLocationEnabled();
+  } else {
+     this.getCurrentLocation();
+  }
+
+ }
+
+
+getCurrentLocation(){
+   BackgroundGeolocation.configure({
+      desiredAccuracy: 10,
+      stationaryRadius: 50,
+      distanceFilter: 50,
+      locationTimeout: 30,
+      notificationTitle: 'Background tracking',
+      notificationText: 'enabled',
+      debug: false,
+      startForeground:false,
+      startOnBoot: false,
+      stopOnTerminate: false,
+      locationProvider: BackgroundGeolocation.provider.ANDROID_ACTIVITY_PROVIDER,
+      interval: 30000, // 30 second in milliseconds
+      fastestInterval: 30000,
+      activitiesInterval: 30000,
+      stopOnStillActivity: false,
+      // url: 'http://192.168.81.15:3000/location',
+      // httpHeaders: {
+      //   'X-FOO': 'bar'
+      // }
+    });
+
+    BackgroundGeolocation.on('location', (location) => {
+      var self = this;
+      let myPosition = {latitude: location.latitude,longitude: location.longitude,};
+      AsyncStorage.getItem("myLocationAddress", (errs,result) => {
+        if(!errs){
+          if(result!=null){
+            this.setState({currentLocation: myPosition, myLocationAddress: result});
+          }
+        }
+      });
+      this._addressFromCoordinates(location.latitude,location.longitude);
+      AsyncStorage.getItem("currentLocation", (errs,result) => {
+        if(!errs){
+          if(result!=null){
+            var data = JSON.parse(result);
+            var lastLat = data.latitude;
+            var lastlon = data.longitude;
+            commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
+              location.latitude, location.longitude,function(distance){
+              //console.warn('distance' + distance)
+              if(distance >= 1){
+                AsyncStorage.setItem("currentLocation",JSON.stringify(location))
+                self.updateStateOfLocation(location);
+              }
+            });
+          }else{
+            AsyncStorage.setItem("currentLocation",JSON.stringify(location))
+            self.updateStateOfLocation(location);
+          }
+        }
+      });
+
+  });
+
+    BackgroundGeolocation.on('stationary', (stationaryLocation) => {
+      //handle stationary locations here
+      //console.warn('Alert stationaryLocation',JSON.stringify(stationaryLocation));
+    });
+
+    BackgroundGeolocation.on('error', (error) => {
+      Alert.alert('Alert','Something went wrong to fetch your location. ' + error);
+    });
+
+    BackgroundGeolocation.start(() => {
+      console.log('[DEBUG] BackgroundGeolocation started successfully');
+    });
+ }
+
+updateStateOfLocation(location){
+  let myPosition = {latitude: location.latitude,longitude: location.longitude,};
+  this.setState({currentLocation: myPosition, myLocationAddress: ''});
+  this.setState({driverCurrentLocation:myPosition});
+  this.setState({region:{latitude:location.latitude,longitude:location.longitude,
+                 latitudeDelta: 0.0922,longitudeDelta: 0.0421}});
+  this._addressFromCoordinates(location.latitude,location.longitude);
+ this.updateLastLocationOfDriver(myPosition);
+}
+
+updateLastLocationOfDriver(myPosition){
+   AsyncStorage.getItem("lastLocation", (errs,result) => {
+        if (!errs) {
+            if (result !== null) {
+              var data = JSON.parse(result);
+              var lastLat = data.latitude;
+              var lastlon = data.longitude;
+              commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
+                myPosition.latitude,myPosition.longitude,function(distance){
+                if(distance >= 1){
+                   AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
+                   AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
+                   AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+                }
+              });
+            }else{
+              AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+            }
+         }
+    });
  }
 
 /*************Managing State to Load conditions views****************************/
@@ -427,18 +513,31 @@ checkRiderFlow(){
 fetchUserBalanceDispatcher(){
   // Start a timer that runs continuous after X milliseconds
 const intervalId = BackgroundTimer.setInterval(() => {
-    // this will be executed every 5 seconds
-    // even when app is the the background
+    // this will be executed every 5 seconds even when app is the the background
     var selfBalance = this;
     AsyncStorage.getItem("userEthereumAddress", (errs,ethAddress) => {
          if (!errs) {
              if (ethAddress !== null) {
                loginUserApiCall.loginUserBalance(ethAddress ,function(err,result){
                  if(result){
-                   //console.warn('result' + result);
-                   selfBalance.setState({tokenBalance:result.toString(10)})
-                   //selfBalance.setState({loadingWithText:false});
-                  // selfBalance.setState({loaderVisible:false});
+                   var currentBalanceValue = result;
+                   selfBalance.setState({tokenBalance:currentBalanceValue.toString()})
+                   AsyncStorage.setItem("currentBalance",currentBalanceValue.toString());
+                   AsyncStorage.getItem("userLastBalance",(err,lastBalance) => {
+                     if(!err){
+                       if(lastBalance !== null){
+                         if(currentBalanceValue >= parseInt(lastBalance)){
+                            Alert.alert('Congratulations','You are a Winner.')
+                            var lastBalance = currentBalanceValue + 500;
+                            AsyncStorage.setItem("userLastBalance", lastBalance.toString());
+                            this.setState({raffleWinnerView:true});
+                         }
+                       }else {
+                         var lastBalance = currentBalanceValue + 500;
+                         AsyncStorage.setItem("userLastBalance", lastBalance.toString());
+                       }
+                     }
+                   });
                  }else{
                    console.log("Error" +err);
                  }
@@ -448,6 +547,7 @@ const intervalId = BackgroundTimer.setInterval(() => {
      })
 }, 5000);
 }
+
 
 fetchUserProfileData(){
   var self =this;
@@ -595,9 +695,11 @@ showLocalNotificationForeground(notif) {
   //these clears notification from notification center/tray
   FCM.removeAllDeliveredNotifications()
 }
+
 raffleComingNotifications(notifData){
-  alert('here..1 '+notifData.timeToRaffle + "== " + notifData.winners[0].prize);
-  this.setState({raffleTime: notifData.timeToRaffle});
+  var timeToRaffle = notifData.timeToRaffle;
+  this.setState({raffleNotificationView:true});
+  this.setState({raffleTime: timeToRaffle});
   this.setState({raffleParticipants: notifData.totalParticipants});
   this.setState({raffleTotalPrice: notifData.totalPrize});
   this.setState({rafflePoolSize: notifData.poolSize});
@@ -609,16 +711,7 @@ raffleComingNotifications(notifData){
   this.setState({raffleWinners4Prize: notifData.winners[3].prize});
   this.setState({raffleWinners5Prize: notifData.winners[4].prize});
 
-  // Start a timer that runs continuous after X milliseconds
-  const intervalId = BackgroundTimer.setInterval(() => {
-      // this will be executed every 200 ms
-      // even when app is the the background
-      this.calculateRaffleTime(timeStart,timeEnd);
-  }, 1000);
-}
-
-calculateRaffleTime(timeStart,timeEnd){
-  var duration = 60000;
+  var duration = timeToRaffle;
   var milliseconds = parseInt((duration%1000)/100)
             , seconds = parseInt((duration/1000)%60)
             , minutes = parseInt((duration/(1000*60))%60)
@@ -627,16 +720,52 @@ calculateRaffleTime(timeStart,timeEnd){
   hours = (hours < 10) ? "0" + hours : hours;
   minutes = (minutes < 10) ? "0" + minutes : minutes;
   seconds = (seconds < 10) ? "0" + seconds : seconds;
-
-  console.warn("hours" + minutes +  seconds)
-
-  this.setState({
-    TimeToRaffleHours : hours.toString(),
-    TimeToRaffleMinutes : minutes.toString(),
-    TimeToRaffleSeconds : seconds.toString(),
-  });
+  var time = hours+":"+minutes+":"+seconds
+  this.setState({raffleTime:time});
+  this.calculateRaffleTime();
 }
+calculateRaffleTime(){
+   var startTime = this.state.raffleTime;
+   var pieces = startTime.split(":");
+   var time = new Date();
+   time.setHours(pieces[0]);
+   time.setMinutes(pieces[1]);
+   time.setSeconds(pieces[2]);
+   var timedif = new Date(time.valueOf() - 1000);
+   var newtime = timedif.toTimeString().split(" ")[0];
+   if(newtime === '00:00:00'){
+     Alert.alert('Alert','Raffle Ended');
+     this.setState({raffleNotificationView:false});
+   }else{
+     this.setState({raffleTime:newtime})
+     // Start a timer that runs once after X milliseconds
+    const timeoutId = BackgroundTimer.setTimeout(() => {
+     // this will be executed once after 1 seconds
+     // even when app is the the background
+       this.calculateRaffleTime();
+    }, 1000);
 
+    var splitTime = newtime.split(":");
+    this.setState({
+      TimeToRaffleHours : splitTime[0].toString(),
+      TimeToRaffleMinutes : splitTime[1].toString(),
+      TimeToRaffleSeconds : splitTime[2].toString(),
+    });
+   }
+}
+closeRaffleView = () =>
+ {
+   this.setState({
+    raffleNotificationView:false
+   });
+ }
+
+closeRaffleEndedView = () =>
+{
+    this.setState({
+     raffleWinnerView:false
+    });
+}
 
 updateDriverRideRequestData(notif){
   //console.warn(JSON.stringify(notif));
@@ -1126,6 +1255,10 @@ _getRiderRoute(){
               self.setState({routePolylines: [...routeway]});
               self.setState({ calculatingRoute: false });
               self.setState({isDestinationRouteDraw:true});
+              self._map.fitToCoordinates(self.state.routePolylines, {
+                  edgePadding: DEFAULT_PADDING,
+                  animated: true,
+             });
 
             }else{
               Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
@@ -1173,6 +1306,7 @@ onGoButton() {
   }
   AsyncStorage.setItem("type","isRider");
   AsyncStorage.setItem("rider","go");
+
 }
 
 requestRide(tokenAmount){
@@ -1306,8 +1440,9 @@ render()
             ref={component => this._map = component}
             region={this.state.region}
             onRegionChangeComplete={this.onRegionChange.bind(this)}
-             showsCompass={true}  defaultZoom={12}
+             showsCompass={true}
              followUserLocation={true}  showsUserLocation={true} >
+
              {!this.state.isDriverApp && !this.state.rideStartAndPickedUp &&
               <MapView.Marker
                   title='Your location'
@@ -1336,6 +1471,7 @@ render()
                     pinColor='orange'
                   />
               }
+
               <MapView.Polyline coordinates={[ ...this.state.routePolylines,]}
                         strokeWidth={4}
                         strokeColor="orange"
@@ -1376,20 +1512,28 @@ render()
           </View>
           { this.renderBottomContent }
 
-          <RaffleNotification
-            raffleTime = {this.state.raffleTime} rafflePoolSize = {this.state.rafflePoolSize}
-            raffleWinners1Prize = {this.state.raffleWinners1Prize}
-            raffleWinners2Prize = {this.state.raffleWinners2Prize}
-            raffleWinners3Prize = {this.state.raffleWinners3Prize}
-            raffleWinners4Prize = {this.state.raffleWinners4Prize}
-            raffleWinners5Prize = {this.state.raffleWinners5Prize}
-            raffleTotalWinners = {this.state.raffleTotalWinners}
-            raffleTotalPrice =    {this.state.raffleTotalPrice}
-            raffleParticipants = {this.state.raffleParticipants}
-            TimeToRaffleHours  ={this.state.TimeToRaffleHours}
-            TimeToRaffleMinutes ={this.state.TimeToRaffleMinutes}
-            TimeToRaffleSeconds ={this.state.TimeToRaffleSeconds} />
+          {this.state.raffleNotificationView &&
+            <RaffleNotification closeRaffleViewCall={this.closeRaffleView}
+              raffleTime = {this.state.raffleTime} rafflePoolSize = {this.state.rafflePoolSize}
+              raffleWinners1Prize = {this.state.raffleWinners1Prize}
+              raffleWinners2Prize = {this.state.raffleWinners2Prize}
+              raffleWinners3Prize = {this.state.raffleWinners3Prize}
+              raffleWinners4Prize = {this.state.raffleWinners4Prize}
+              raffleWinners5Prize = {this.state.raffleWinners5Prize}
+              raffleTotalWinners = {this.state.raffleTotalWinners}
+              raffleTotalPrice =    {this.state.raffleTotalPrice}
+              raffleParticipants = {this.state.raffleParticipants}
+              TimeToRaffleHours  = {this.state.TimeToRaffleHours}
+              TimeToRaffleMinutes ={this.state.TimeToRaffleMinutes}
+              TimeToRaffleSeconds ={this.state.TimeToRaffleSeconds} />
+          }
 
+          {this.state.raffleWinnerView &&
+            <RaffleEnded closeRaffleEndedViewCall ={this.closeRaffleEndedView}
+            raffleTotalPrice = {this.state.raffleTotalPrice}
+            userPic ={this.state.loginProfilePic}
+            userName = {this.state.loginName}/>
+          }
 
           <Modal visible={this.state.modalVisible} onRequestClose={() => {this.setState({modalVisible:false })}}>
               <AutoCompleteAddressModel onSelect = {(value) => {
@@ -1534,6 +1678,7 @@ render()
               </View>
           </PopupDialog>
 
+
           <Spinner visible={this.state.loaderVisible} overlayColor={ "rgba(0, 0, 0, 0.50)" }/>
 
           <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={ this.state.calculatingRoute }>
@@ -1645,7 +1790,7 @@ get renderBottomContent(){
                       <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                         <Image source={ require("@Resources/Images/destination-icon-driver.png")  } style={ styles.driveImageToken }/>
                         <Text  numberOfLines={2}  style={{width:100,fontFamily: 'Exo-Medium', fontSize:14, color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpDestinationAddress} </Text>
-                   </View>
+                      </View>
                    </View>
                    <View style={{flexDirection:'row' , backgroundColor:'#FFF',height:65,justifyContent:'center',alignItems:'center'}}>
                     <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
@@ -1864,6 +2009,7 @@ get renderBottomContent(){
 }
 
 
+
 openTermsDialog(){
   this.termsConditionDialog.show();
 }
@@ -1912,6 +2058,11 @@ drawRouteBtwDriverAndRiderLocation(){
            }
           self.setState({riderRequestPolyline: [...routeway] });
           self.setState({loaderVisible:false});
+          self._map.fitToCoordinates(self.state.riderRequestPolyline, {
+              edgePadding: DEFAULT_PADDING,
+              animated: true,
+         });
+
         }
       }else{
         Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
