@@ -15,6 +15,7 @@ module.exports.findRouteBtwSourceAnDestination = function(toLoc,fromLoc,callback
 
 module.exports.findRouteBtwSourceAnDestinationWithWayPoint = function(toLoc,fromLoc,riderWayPoint,callback){
   var URL =  routeURL+ toLoc +"&destination="+fromLoc+ "&waypoints=optimize:true|" +riderWayPoint+ "&units=imperial&mode=driving&key="+routeKEY+""
+  console.warn("URL" + URL);
   webAPICall.getApi(URL,'GET').then((responseJson) =>  {
       callback(responseJson);
   })

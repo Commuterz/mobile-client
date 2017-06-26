@@ -67,6 +67,8 @@ var refreshIntervalId=null;
 var rideStartLocationInterval = null;
 var typeToLoad ='';
 const DEFAULT_PADDING = { top: 60, right: 60, bottom: 60, left: 60 };
+const raffleTimeoutId = 0;
+
 export default class Home extends Component
 {
   constructor(props) {
@@ -117,19 +119,6 @@ export default class Home extends Component
       isDriverApp: false,
       riderFullName:'',
       riderProfilePic:'',
-      driverFullName:'',
-      driverCallNumber:'1234567890',
-      driverProfilePic:userPic,
-      driverCurrentLocation:'',
-      driverRideRequestCost:0,
-      driverPickUpSource:'',
-      driverPickUpDestination:'',
-      driverPickUpSourceAddress:'',
-      driverPickUpDestinationAddress:'',
-      driverPickUpTime:'0',
-      driverPickUpDistance:'',
-      driverRideRequest:false,
-      isDriverApprovedRide:false,
       timeToPickUpByDriver:0,
       distanceToPickByDriver:0,
       openRideRequestPopup:false,
@@ -142,26 +131,44 @@ export default class Home extends Component
       loginName:'',
       loginFBID : '',
       loginProfilePic:userPic,
-      driverCarName :'Red Toyota',
-      driverCarPlateNumber:'012345',
       riderWaitingForPickUp:false,
       rideStartAndPickedUp:false,
       rideStartRoutePolyline:[],
-      driverLastCurrentLocation :'',
       searchingForDriver:false,
       riderTimeToDestination:0,
       riderDistanceRemained:0,
+
+
+      //driver side state
+      driverStartedRide:false,
+      driverLastCurrentLocation :'',
+      driverFullName:'',
+      driverCallNumber:'1234567890',
+      driverCarName :'Red Toyota',
+      driverCarPlateNumber:'012345',
+      driverProfilePic:userPic,
+      driverCurrentLocation:'',
+      driverRideRequestCost:0,
+      driverPickUpSource:'',
+      driverPickUpDestination:'',
+      driverPickUpSourceAddress:'',
+      driverPickUpDestinationAddress:'',
+      driverPickUpTime:'0',
+      driverPickUpDistance:'',
+      driverRideRequest:false,
+      isDriverApprovedRide:false,
+
 
       //raffleStates
       raffleNotificationView:false,
       raffleTime:'00:00:00' , //default 1 minute,
       rafflePoolSize:'00',
-      raffleWinners1Prize:'',
-      raffleWinners2Prize:'',
-      raffleWinners3Prize:'',
-      raffleWinners4Prize:'',
-      raffleWinners5Prize:'',
-      raffleTotalWinners:'',
+      raffleWinners1Prize:'1000',
+      raffleWinners2Prize:'0',
+      raffleWinners3Prize:'0',
+      raffleWinners4Prize:'0',
+      raffleWinners5Prize:'0',
+      raffleTotalWinners:'0',
       raffleTotalPrice:'0',
       raffleParticipants:'0',
       TimeToRaffleHours:'00',
@@ -169,6 +176,8 @@ export default class Home extends Component
       TimeToRaffleSeconds:'00',
       isWinnerDeclare:false,
       raffleWinnerView:false,
+
+      locationOnLoad:'0',
 
     };
 }
@@ -341,8 +350,8 @@ getCurrentLocation(){
    BackgroundGeolocation.configure({
       desiredAccuracy: 10,
       stationaryRadius: 50,
-      distanceFilter: 50,
-      locationTimeout: 30,
+      distanceFilter:1000,
+      locationTimeout: 50,
       notificationTitle: 'Background tracking',
       notificationText: 'enabled',
       debug: false,
@@ -362,15 +371,11 @@ getCurrentLocation(){
 
     BackgroundGeolocation.on('location', (location) => {
       var self = this;
-      let myPosition = {latitude: location.latitude,longitude: location.longitude,};
-      AsyncStorage.getItem("myLocationAddress", (errs,result) => {
-        if(!errs){
-          if(result!=null){
-            this.setState({currentLocation: myPosition, myLocationAddress: result});
-          }
-        }
-      });
-      this._addressFromCoordinates(location.latitude,location.longitude);
+      //console.warn('location',location.latitude);
+      if(this.state.locationOnLoad === '0'){
+          self.updateStateOfLocation(location);
+          this.setState({locationOnLoad:'1'});
+      }
       AsyncStorage.getItem("currentLocation", (errs,result) => {
         if(!errs){
           if(result!=null){
@@ -647,6 +652,7 @@ fcmTokenAndNotificationHandling(){
 }
 
 showLocalNotificationForeground(notif) {
+  //console.warn("nofi method");
    if(notif.type === 'Ride request'){
      var body = JSON.parse(notif.body);
      if(body.type === 'raffleNotifications'){
@@ -656,40 +662,50 @@ showLocalNotificationForeground(notif) {
      }else if(body.type === 'rideRequest'){
        if(!this.state.isRiderApp){
          Alert.alert( 'Ride Request', 'You have a new ride request.',
-           [{text: 'OK', onPress: () => this.updateDriverRideRequestData(notif)}, ],
+           [{text: 'OK', onPress: () => this.updateDriverRideRequestData(body)}, ],
               { cancelable: false } )
        }
      }
    }else if(notif.type === 'driver_msg'){
      var body = JSON.parse(notif.body);
       if(body.type === 'rideStartByDriver'){
-             Alert.alert('Driver Arrived', "Driver arrived to your location.");
-             this.setState({riderWaitingForPickUp:false});
-             this.setState({searchingForDriver:false});
-             this.setState({rideStartAndPickedUp:true});
-             AsyncStorage.setItem("rider","ride_start");
-            const timeoutId = BackgroundTimer.setTimeout(() => {
-             // this will be executed once after 10 seconds
-             // even when app is the the background
-               this.rideStartAtRiderSide(notif);
-             }, 10000);
-           // Cancel the timeout if necessary
-           BackgroundTimer.clearTimeout(timeoutId);
+        this.setState({riderWaitingForPickUp:false});
+        this.setState({searchingForDriver:false});
+        this.setState({rideStartAndPickedUp:true});
+        AsyncStorage.setItem("rider","ride_start");
 
+        Alert.alert( 'Driver Arrived', 'Driver arrived to your location.',
+          [{text: 'OK', onPress: () => this.rideStartAtRiderSide(body)}, ],
+             { cancelable: false } )
+
+      }else if(body.type === 'rideRunningByDriver'){
+         const timeoutId = BackgroundTimer.setTimeout(() => {
+          // this will be executed once after 200 mili seconds
+          // even when app is the the background
+            this.rideStartAtRiderSide(body);
+          }, 200);
+        // Cancel the timeout if necessary
+        BackgroundTimer.clearTimeout(timeoutId);
        }else if(body.type === 'rideAcceptByDriver'){
-           Alert.alert('Ride Accept', "Your requested ride is accepted");
-           this.setState({searchingForDriver:false});
-           this.setState({riderWaitingForPickUp:false});
-           this.rideAcceptViewToRider(notif);
-       }else if(body.type === 'driverEndRide'){
-         Alert.alert('Ride End', "Congratulations, you have reached to your destination.");
-         this.setState({riderWaitingForPickUp:false});
-         this.setState({searchingForDriver:false});
-         this.setState({rideStartAndPickedUp:false});
-         this.setState({rateRiderPopup:true});
-         AsyncStorage.setItem("rider","rate_driver");
 
-       }
+         Alert.alert( 'Ride Accept', 'Your requested ride is accepted.',
+           [{text: 'OK', onPress: () => this.rideAcceptViewToRider(body)}, ],
+              { cancelable: false } )
+
+         this.setState({searchingForDriver:false});
+         this.setState({riderWaitingForPickUp:false});
+
+       }else if(body.type === 'driverEndRide'){
+        this.setState({riderWaitingForPickUp:false});
+        this.setState({searchingForDriver:false});
+        this.setState({rideStartAndPickedUp:false});
+        this.setState({rateRiderPopup:true});
+        AsyncStorage.setItem("rider","rate_driver");
+        Alert.alert( 'Ride End', 'Congratulations, you have reached to your destination.',
+          [{text: 'OK', onPress: () => console.log('Ride End')}, ],
+             { cancelable: false } )
+
+      }
    }
 
   //these clears notification from notification center/tray
@@ -710,7 +726,6 @@ raffleComingNotifications(notifData){
   this.setState({raffleWinners3Prize: notifData.winners[2].prize});
   this.setState({raffleWinners4Prize: notifData.winners[3].prize});
   this.setState({raffleWinners5Prize: notifData.winners[4].prize});
-
   var duration = timeToRaffle;
   var milliseconds = parseInt((duration%1000)/100)
             , seconds = parseInt((duration/1000)%60)
@@ -734,12 +749,13 @@ calculateRaffleTime(){
    var timedif = new Date(time.valueOf() - 1000);
    var newtime = timedif.toTimeString().split(" ")[0];
    if(newtime === '00:00:00'){
-     Alert.alert('Alert','Raffle Ended');
-     this.setState({raffleNotificationView:false});
+     Alert.alert( 'Raffle Ended', 'Raffle Time is Ended',
+       [{text: 'OK', onPress: () => this.raffleEndedView()}, ],
+          { cancelable: false } )
    }else{
      this.setState({raffleTime:newtime})
      // Start a timer that runs once after X milliseconds
-    const timeoutId = BackgroundTimer.setTimeout(() => {
+    raffleTimeoutId = BackgroundTimer.setTimeout(() => {
      // this will be executed once after 1 seconds
      // even when app is the the background
        this.calculateRaffleTime();
@@ -753,8 +769,13 @@ calculateRaffleTime(){
     });
    }
 }
+raffleEndedView(){
+  BackgroundTimer.clearTimeout(raffleTimeoutId);
+  this.setState({raffleNotificationView:false});
+}
 closeRaffleView = () =>
  {
+   BackgroundTimer.clearTimeout(raffleTimeoutId);
    this.setState({
     raffleNotificationView:false
    });
@@ -762,14 +783,15 @@ closeRaffleView = () =>
 
 closeRaffleEndedView = () =>
 {
+   BackgroundTimer.clearTimeout(raffleTimeoutId);
     this.setState({
      raffleWinnerView:false
     });
 }
 
-updateDriverRideRequestData(notif){
+updateDriverRideRequestData(body){
   //console.warn(JSON.stringify(notif));
-  if(notif === ''){
+  if(body === ''){
     var self = this;
     AsyncStorage.getItem("riderDeviceToken", (errs,result) => {
       if(!errs){
@@ -851,8 +873,7 @@ updateDriverRideRequestData(notif){
     this.setState({openRideRequestPopup:true});
     this.setState({driverRideRequest:true});
     this.setState({isCalculatedResult:false})
-
-    var body = JSON.parse(notif.body);
+    //var body = JSON.parse(notif.body);
     var sourceAddress= body.sourceAddress;
     var destinationAddress= body.destinationAddress;
     var riderSourcePoints = body.source;
@@ -958,9 +979,9 @@ rideApprovedByDriver(){
    });
 }
 
-rideAcceptViewToRider(notif){
+rideAcceptViewToRider(body){
   AsyncStorage.setItem("rider","ride_accept_by_driver");
-  if(notif === ''){
+  if(body === ''){
     var self = this;
     AsyncStorage.getItem("driverCarName", (errs,result) => {
            if (!errs) {
@@ -1024,7 +1045,6 @@ rideAcceptViewToRider(notif){
   }
   else{
       this.riderNotifiedDialog.show();
-      var body = JSON.parse(notif.body);
       var driverCurrentLocation = body.source;
       var driverName = body.driverName;
       var driverProfilePic = body.driverProfilePic;
@@ -1046,19 +1066,18 @@ rideAcceptViewToRider(notif){
       this.setState({riderDistanceRemained:distanceToPickUp});
 
       AsyncStorage.setItem("driverCarName",carName);
-      AsyncStorage.setItem("driverCarPlateNumber",driverCarPlateNumber);
-      AsyncStorage.setItem("driverFullName",driverFullName);
+      AsyncStorage.setItem("driverCarPlateNumber",carPlateNumber);
+      AsyncStorage.setItem("driverFullName",driverName);
       AsyncStorage.setItem("driverCallNumber",phoneNum);
       AsyncStorage.setItem("driverProfilePic",driverProfilePic);
       AsyncStorage.setItem("riderTimeToDestination",timeToPickUp);
       AsyncStorage.setItem("riderDistanceRemained",distanceToPickUp);
-      }
+    }
 }
 
-rideStartAtRiderSide(notif){
-  console.warn("<< rideStartAtRiderSide")
+rideStartAtRiderSide(body){
   AsyncStorage.setItem("rider","ride_start");
-  if(notif === ''){
+  if(body === ''){
     console.warn("<< rideStartAtRiderSide if")
     var self= this;
     AsyncStorage.getItem("driverCarName", (errs,result) => {
@@ -1129,8 +1148,8 @@ rideStartAtRiderSide(notif){
             }
       });
   }else{
-      console.warn("<< rideStartAtRiderSide else")
-    var body = JSON.parse(notif.body);
+      console.warn("<< rideStartAtRiderSide else" + body.source);
+    //var body = JSON.parse(notif.body);
     var driverCurrentLocation = body.source;
     var driverName = body.driverName;
     var driverProfilePic = body.driverProfilePic;
@@ -1149,14 +1168,16 @@ rideStartAtRiderSide(notif){
     this.setState({driverProfilePic:driverProfilePic});
     this.setState({riderTimeToDestination:timeRemained});
     this.setState({riderDistanceRemained:distanceRemained});
+
     AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(driverCurrentLocation));
     AsyncStorage.setItem("driverCarName",carName);
-    AsyncStorage.setItem("driverCarPlateNumber",driverCarPlateNumber);
-    AsyncStorage.setItem("driverFullName",driverFullName);
+    AsyncStorage.setItem("driverCarPlateNumber",carPlateNumber);
+    AsyncStorage.setItem("driverFullName",driverName);
     AsyncStorage.setItem("driverCallNumber",phoneNum);
     AsyncStorage.setItem("driverProfilePic",driverProfilePic);
-    AsyncStorage.setItem("riderTimeToDestination",timeToPickUp);
-    AsyncStorage.setItem("riderDistanceRemained",distanceToPickUp);
+    AsyncStorage.setItem("riderTimeToDestination",timeRemained);
+    AsyncStorage.setItem("riderDistanceRemained",distanceRemained);
+
     this.drawRouteForRideStart();
   }
 
@@ -1172,8 +1193,11 @@ drawRouteForRideStart(){
   var toLoc =currentLocation.latitude+"," + currentLocation.longitude;
   var destinationLocation = this.state.destinationLocation;
   var fromLoc =destinationLocation.latitude+"," + destinationLocation.longitude;
+  var wayPoint = this.state.currentLocation;
+  var riderWayPoint = wayPoint.latitude +"," + wayPoint.longitude;
   var self = this;
-  routeCall.findRouteBtwSourceAnDestination(toLoc,fromLoc,function(responseJson){
+  console.warn(toLoc +" == " + fromLoc +" === " +riderWayPoint )
+  routeCall.findRouteBtwSourceAnDestinationWithWayPoint(toLoc,fromLoc,riderWayPoint,function(responseJson){
           if(responseJson){
             if (responseJson.routes.length){
               for(var i=0; i<responseJson.routes.length;i++){
@@ -1206,6 +1230,10 @@ drawRouteForRideStart(){
               self.setState({rideStartRoutePolyline: [...routeway]});
               self.setState({ calculatingRoute: false });
               self.setState({isDestinationRouteDraw:true});
+              self._map.fitToCoordinates(self.state.rideStartRoutePolyline, {
+                  edgePadding: DEFAULT_PADDING,
+                  animated: true,
+             });
             }else{
               console.log("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
               self.setState({ calculatingRoute: false });
@@ -1352,6 +1380,7 @@ rateByRider(){
         self.setState({loaderVisible:false});
         self.setState({driverRideRequest:false});
         self.setState({rideStartAndPickedUp:false});
+        self.setState({destinationAddress:'My Destination Address'})
         AsyncStorage.setItem("type","home");
       }
   });
@@ -1372,7 +1401,7 @@ closeRideRequestPopUp()
 closeRiderNotifiedDialog(){
   this.riderNotifiedDialog.dismiss();
   this.setState({riderWaitingForPickUp:true});
-  this.drawRouteBtwDriverAndRiderLocation();
+  this.drawRouteForRideStart();
   AsyncStorage.setItem("rider","ride_approved_driver");
 }
 
@@ -1427,8 +1456,6 @@ riderEmergencyButton(){
 
 render()
   {
-
-
   return (
         <View style={styles.container}>
           <HomeTopBar tokenBalance = {this.state.tokenBalance}
@@ -1436,7 +1463,7 @@ render()
           <PriceTimer/>
           <View style={ styles.mapWrapper } >
 
-          <MapView style={styles.map}
+        <MapView style={styles.map}
             ref={component => this._map = component}
             region={this.state.region}
             onRegionChangeComplete={this.onRegionChange.bind(this)}
@@ -1505,28 +1532,30 @@ render()
                           coordinate={ this.state.driverCurrentLocation }
                           image={require("@Resources/Images/driver-car.png")}
                   />
-                }
+              }
+
           </MapView>
             { this.renderMyLocationButton }
 
           </View>
           { this.renderBottomContent }
 
+
           {this.state.raffleNotificationView &&
-            <RaffleNotification closeRaffleViewCall={this.closeRaffleView}
-              raffleTime = {this.state.raffleTime} rafflePoolSize = {this.state.rafflePoolSize}
-              raffleWinners1Prize = {this.state.raffleWinners1Prize}
-              raffleWinners2Prize = {this.state.raffleWinners2Prize}
-              raffleWinners3Prize = {this.state.raffleWinners3Prize}
-              raffleWinners4Prize = {this.state.raffleWinners4Prize}
-              raffleWinners5Prize = {this.state.raffleWinners5Prize}
-              raffleTotalWinners = {this.state.raffleTotalWinners}
-              raffleTotalPrice =    {this.state.raffleTotalPrice}
-              raffleParticipants = {this.state.raffleParticipants}
-              TimeToRaffleHours  = {this.state.TimeToRaffleHours}
-              TimeToRaffleMinutes ={this.state.TimeToRaffleMinutes}
-              TimeToRaffleSeconds ={this.state.TimeToRaffleSeconds} />
-          }
+          <RaffleNotification closeRaffleViewCall={this.closeRaffleView}
+            raffleTime = {this.state.raffleTime} rafflePoolSize = {this.state.rafflePoolSize}
+            raffleWinners1Prize = {this.state.raffleWinners1Prize}
+            raffleWinners2Prize = {this.state.raffleWinners2Prize}
+            raffleWinners3Prize = {this.state.raffleWinners3Prize}
+            raffleWinners4Prize = {this.state.raffleWinners4Prize}
+            raffleWinners5Prize = {this.state.raffleWinners5Prize}
+            raffleTotalWinners = {this.state.raffleTotalWinners}
+            raffleTotalPrice =    {this.state.raffleTotalPrice}
+            raffleParticipants = {this.state.raffleParticipants}
+            TimeToRaffleHours  = {this.state.TimeToRaffleHours}
+            TimeToRaffleMinutes ={this.state.TimeToRaffleMinutes}
+            TimeToRaffleSeconds ={this.state.TimeToRaffleSeconds} />
+        }
 
           {this.state.raffleWinnerView &&
             <RaffleEnded closeRaffleEndedViewCall ={this.closeRaffleEndedView}
@@ -1840,6 +1869,30 @@ get renderBottomContent(){
                 </View>
             </View>
           );
+      }else if(this.state.driverStartedRide){
+        return(
+          <View style={styles.driverRideApprovedRectangle}>
+          <View style={{flexDirection:'column' , height:40}}>
+            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+             <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Time to Destination </Text>
+              <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Distance Remained</Text>
+            </View>
+            </View>
+            <View style={{flexDirection:'column', height:63}}>
+            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                <View style={styles.rideViewRectangle}>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderTimeToDestination}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
+                </View>
+                <View style={styles.rideViewRectangleRight}>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderDistanceRemained}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
+                </View>
+            </View>
+              </View>
+          </View>
+        );
+
       }else if(this.state.rateDriverPopup){
             return(
               <View style={styles.rateRectangle}>
@@ -2008,8 +2061,6 @@ get renderBottomContent(){
   }
 }
 
-
-
 openTermsDialog(){
   this.termsConditionDialog.show();
 }
@@ -2018,7 +2069,7 @@ closeTermsDialog(){
 }
 /****************************Driver App Side Code*****************************************************************/
 drawRouteBtwDriverAndRiderLocation(){
-  //console.warn('drawRouteBtwDriverAndRiderLocation');
+  console.warn('drawRouteBtwDriverAndRiderLocation');
   var self =this;
   var  routeway=[];
   var driverCurrentLocation = this.state.currentLocation;
@@ -2039,8 +2090,12 @@ drawRouteBtwDriverAndRiderLocation(){
                  var legsList = routesList.legs[j];
                  var distanceVal = legsList.distance.value;
                  var time = legsList.duration.value;
+
+                 console.warn('time' + time +" == " + legsList.duration.text);
                  var disMiles = distanceVal / 1609.344;
                  disMiles = parseFloat(Math.round(disMiles * 100) / 100).toFixed(2) +"";
+
+                console.warn('disMiles' + disMiles +" == " + legsList.distance.text);
 
                  self.setState({distanceToPickByDriver:disMiles})
                  self.setState({timeToPickUpByDriver:self.getTimeFromGoogleValue(time)})
@@ -2072,7 +2127,7 @@ drawRouteBtwDriverAndRiderLocation(){
 
 //approve ride request open poup for confirmation
 acceptRideRequest(){
-  AsyncStorage.setItem("driver","approve_ride");
+ AsyncStorage.setItem("driver","approve_ride");
  this.driverPopupDialog.show();
 }
 //decline ride request button when any ride request from customer
@@ -2106,6 +2161,7 @@ cleanAllStatesAndOpenHome(){
  this.setState({driverRideRequest:false});
  this.setState({rideStartAndPickedUp:false});
  this.setState({destinationAddress:'My Destination Address'})
+ this.setState({driverStartedRide:false})
   AsyncStorage.setItem("type","home");
 
 }
@@ -2131,7 +2187,7 @@ closeRiderRequestPopUp(){
   // refreshIntervalId = BackgroundTimer.setInterval(() => {
   //     // this will be executed every 200 ms
   //     // even when app is the the background
-  //     this.checkDriverReachNearToRider()
+  //     this.checkDriverReachNearToRider('rideStartByDriver')
   // }, 5000);
 }
 
@@ -2164,17 +2220,17 @@ rideAcceptRequestNotification(){
      }).done();
 }
 
-checkDriverReachNearToRider(){
+checkDriverReachNearToRider(value){
   //console.warn("checking checkDriverReachNearToRider")
   var driverCurrentLocation = this.state.currentLocation;
   var riderCurrentLocation = this.state.driverPickUpSource;
   var self = this;
   commonUtility.getDistanceFromLatLonInKm(driverCurrentLocation.latitude,driverCurrentLocation.longitude,
     riderCurrentLocation.latitude,riderCurrentLocation.longitude,function(distance){
-    if(distance <= 100){
+    if(distance >= 1){ //distance 1 km
       // Cancel the timer when you are done with it
       BackgroundTimer.clearInterval(refreshIntervalId);
-      self.startRide();
+      self.startRide(value);
     }else{
       Alert.alert('Alert','Ride can not be start as you are not in the range of 100 m from rider location.')
     }
@@ -2183,26 +2239,41 @@ checkDriverReachNearToRider(){
 
 startRideOnButton(){
   BackgroundTimer.clearInterval(refreshIntervalId);
-  AsyncStorage.setItem("driver","ride_start");
-  Alert.alert('Ride Start','You have reached rider location.');
+  Alert.alert('Ride Start', 'You have reached rider location.', [
+   {text: 'Ok', onPress: () => console.log('rider location') },
+   ], { cancelable: false } )
   this.setState({isRideStarted:true});
   this.setState({riderWaitingForPickUp:false})
-  this.getTimeAndDistanceRemainedUsingDirectionAPI();
-}
-
-startRide(){
-  AsyncStorage.setItem("driver","ride_start");
-  Alert.alert('Ride Start','You have reached rider location.');
-  this.setState({isRideStarted:true});
-  this.setState({riderWaitingForPickUp:false})
+  this.setState({driverStartedRide:true});
+  this.getTimeAndDistanceRemainedUsingDirectionAPI('rideStartByDriver');
   rideStartLocationInterval = BackgroundTimer.setInterval(() => {
       // this will be executed every 1 sec
       // even when app is the the background
-      this.checkLastLocationOfDriverAndSendCurrentLocation();
+      this.checkLastLocationOfDriverAndSendCurrentLocation('runningRide');
+  }, 1000);
+  AsyncStorage.setItem("driver","ride_start");
+}
+
+startRide(value){
+  AsyncStorage.setItem("driver","ride_start");
+  Alert.alert('Ride Start','You have reached rider location.');
+  this.setState({isRideStarted:true});
+  this.setState({riderWaitingForPickUp:false})
+  this.setState({driverStartedRide:true});
+  rideStartLocationInterval = BackgroundTimer.setInterval(() => {
+      // this will be executed every 1 sec
+      // even when app is the the background
+      if(value === 'rideStartByDriver'){
+        this.checkLastLocationOfDriverAndSendCurrentLocation(value);
+        value = ''
+      }else{
+        this.checkLastLocationOfDriverAndSendCurrentLocation('rideRunningByDriver');
+      }
+
   }, 1000);
 }
 
-checkLastLocationOfDriverAndSendCurrentLocation(){
+checkLastLocationOfDriverAndSendCurrentLocation(value){
   var self = this;
   AsyncStorage.getItem("lastLocation", (errs,result) => {
        if (!errs) {
@@ -2212,10 +2283,10 @@ checkLastLocationOfDriverAndSendCurrentLocation(){
              var lastlon = data.longitude;
              commonUtility.getDistanceFromLatLonInKm(this.state.currentLocation,this.state.destinationLocation,
                lastLat,lastlon,function(distance){
-                 // if distance becomes greater than 0.5 km /500m then send update to rider.
-               if(distance >= 500){
+                 // if distance becomes greater 1 km then send update to rider.
+               if(distance >=1){
                  //self.sendNotifToRiderAboutRideStart();
-                 self.getTimeAndDistanceRemainedUsingDirectionAPI();
+                 self.getTimeAndDistanceRemainedUsingDirectionAPI(value);
                }
              });
            }
@@ -2223,7 +2294,7 @@ checkLastLocationOfDriverAndSendCurrentLocation(){
    });
 }
 
-getTimeAndDistanceRemainedUsingDirectionAPI(){
+getTimeAndDistanceRemainedUsingDirectionAPI(value){
   var self =this;
   var  routeway=[];
   var driverCurrentLocation = this.state.currentLocation;
@@ -2246,11 +2317,13 @@ getTimeAndDistanceRemainedUsingDirectionAPI(){
                  var time = legsList.duration.value;
                  var disMiles = distanceVal / 1609.344;
                  disMiles = parseFloat(Math.round(disMiles * 100) / 100).toFixed(2) +"";
+                 console.warn("time" , time +" ==  "+ legsList.duration.text +" dis" + disMiles +" == "+ legsList.distance.text );
+
                  self.setState({distanceToPickByDriver:disMiles})
                  self.setState({timeToPickUpByDriver:self.getTimeFromGoogleValue(time)})
                }
            }
-          self.sendNotifToRiderAboutRideStart();
+          self.sendNotifToRiderAboutRideStart(value);
         }
       }else{
         Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
@@ -2259,7 +2332,8 @@ getTimeAndDistanceRemainedUsingDirectionAPI(){
 }
 
 
-sendNotifToRiderAboutRideStart(){
+sendNotifToRiderAboutRideStart(value){
+  console.warn('Value Is Ride Started or Runnning' + value)
   var jsonData = JSON.stringify(
        {
         source: this.state.currentLocation,
@@ -2274,7 +2348,7 @@ sendNotifToRiderAboutRideStart(){
         driverIPFS:this.state.userProfileIPFS,
         driverName : this.state.loginName,
         driverProfilePic: this.state.loginProfilePic,
-        type:'rideStartByDriver',
+        type: value, // value can be rideStartByDriver or rideRunningByDriver
         driverCarName:this.state.driverCarName,
         driverCarPlateNumber:this.state.driverCarPlateNumber,
         driverCallNumber:this.state.driverCallNumber,
@@ -2298,6 +2372,7 @@ rideEndByDriver(){
   var self=this;
   driverApiCall.rideEndByDriver(this.state.userPrivateKey,this.state.rideIdGetByDriver,function(err,result){
       if(result){
+
           self.showRateViewForDriver();
       }else{
         Alert.alert("Alert","Something went wrong while ending your ride." +err);
@@ -2308,6 +2383,7 @@ rideEndByDriver(){
 
 showRateViewForDriver(){
   AsyncStorage.setItem("driver","ride_end_rate");
+  this.setState({driverStartedRide:false});
   this.setState({isRideStarted:false})
   this.setState({rateRiderPopup:true})
   this.setState({isDriverApprovedRide:false})
@@ -2361,6 +2437,8 @@ rateByDriver(){
         self.setState({riderRequestPolyline:[]})
         self.setState({loaderVisible:false});
         self.setState({driverRideRequest:false});
+        self.setState({destinationAddress:'My Destination Address'})
+        self.setState({driverStartedRide:false});
         AsyncStorage.setItem("type","home");
       }
   });

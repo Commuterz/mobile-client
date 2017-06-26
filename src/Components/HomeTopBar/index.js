@@ -6,10 +6,14 @@ import { Actions, Scene } from 'react-native-router-flux'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import loginUserApiCall from '@API/loginUserApiCall'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 class HomeTopBar extends Component {
   constructor(props){
     super(props)
+    this.state={
+      loaderVisible:false,
+    }
   }
 
   onMenu() {
@@ -35,13 +39,17 @@ logoutFromFacebook(){
 }
 onShop() {
   var self = this;
+  self.setState({loaderVisible:true});
   AsyncStorage.getItem("userPrivateKey", (errs,userPrivateKey) => {
        if (!errs) {
            if (userPrivateKey !== null) {
              loginUserApiCall.shopCall(userPrivateKey ,function(err,result){
                if(result){
+                  self.setState({loaderVisible:false});
                 Alert.alert('Alert','You have shoped successfully.');
+
                }else{
+                 self.setState({loaderVisible:false});
                  Alert.alert('Alert','Error '+err);
                }
              });
@@ -84,6 +92,8 @@ render() {
             </View>
           </View>
         </View>
+        <Spinner overlayColor={ "rgba(0, 0, 0, 0.65)" } visible={this.state.loaderVisible}
+         textContent={"Please wait.."} textStyle={{color: '#FFF',fontFamily:"Exo-Regular"}} ></Spinner>
       </View>
 
     )
