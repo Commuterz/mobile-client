@@ -13,21 +13,24 @@ const styles = StyleSheet.create({
     marginTop:20,
     marginBottom:8,
     marginLeft:-18,
-    fontFamily:'Exo-Medium'
+    fontFamily:'Exo-Medium',
+      backgroundColor:'transparent',
   },
   textCarTitle:{
     fontSize:24,
     marginBottom:75,
     color:'#FFFF',
     height:50,
-    fontFamily:'Exo-Regular'
+    fontFamily:'Exo-Regular',
+      backgroundColor:'transparent',
   },
   textInput:{
     height: 50,
     color:'#FFF',
     fontSize:18,
     paddingLeft:10,
-    fontFamily:'Exo-Medium'
+    fontFamily:'Exo-Medium',
+      backgroundColor:'transparent',
   },
   loginButtonBg:{
     width: '80%',

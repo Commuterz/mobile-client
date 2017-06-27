@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import { Provider,connect } from 'react-redux';
 import { Actions, Router, Scene } from 'react-native-router-flux';
 import SplashScreen from 'react-native-splash-screen'
-import {View, Platform,AsyncStorage} from 'react-native';
+import {View, Platform,AsyncStorage,NetInfo} from 'react-native';
 
 import configureStore from '@lib/configureStore'
 import Login from '@Containers/login';
@@ -30,6 +30,24 @@ export default class App extends Component {
         SplashScreen.hide();
     }
   }
+  componentDidMount()
+  {
+    NetInfo.isConnected.addEventListener( 'change', this._handleConnectivityChange );
+     NetInfo.isConnected.fetch().done( (isConnected) =>
+     {
+        AsyncStorage.setItem('isNetworkAvailable',isConnected.toString());
+      } );
+  }
+
+  componentWillUnmount()
+  {
+      NetInfo.isConnected.removeEventListener( 'change', this._handleConnectivityChange );
+  }
+
+   _handleConnectivityChange = (isConnected) =>
+   {
+        AsyncStorage.setItem('isNetworkAvailable',isConnected.toString());
+   };
 
   render() {
     return (

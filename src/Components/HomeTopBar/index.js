@@ -46,7 +46,7 @@ onShop() {
              loginUserApiCall.shopCall(userPrivateKey ,function(err,result){
                if(result){
                   self.setState({loaderVisible:false});
-                Alert.alert('Alert','You have shoped successfully.');
+                 Alert.alert('Alert','You have shoped successfully.');
 
                }else{
                  self.setState({loaderVisible:false});

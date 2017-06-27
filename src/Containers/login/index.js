@@ -1,7 +1,7 @@
 'use strict';
 
 import React, {Component} from 'react';
-import {View, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,AsyncStorage,NetInfo,Platform} from 'react-native';
+import {View, StatusBar, Text,Image,TextInput,StyleSheet,TouchableOpacity,Alert,AsyncStorage,NetInfo,Platform} from 'react-native';
 import BackgroundImage from '@Components/BackgroundImage'
 import styles from './styles'
 import { Actions, Scene } from 'react-native-router-flux'
@@ -13,7 +13,7 @@ import api from '@API/api';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { AccessToken,LoginButton, LoginManager,GraphRequest,GraphRequestManager } from 'react-native-fbsdk';
 import webAPICall from '@API/webAPICall'
-import {addProfileJSON} from '@lib/constants'
+import {addProfileJSON,statusBarColor} from '@lib/constants'
 var BigNumber = require('bignumber.js');
 
 //var ipfs = require('ipfs-js');
@@ -120,14 +120,15 @@ logoutFromFacebook(){
 }
 
 registerUser(){
-  NetInfo.isConnected.fetch().then(isConnected => {
-    if(isConnected){
-      var self =this;
-      //console.warn('userpas'+userPassword);
+  var self =this;
+  AsyncStorage.getItem('isNetworkAvailable', (err, result) =>
+  {
+    if(result=='true')
+    {
+
       userPrivateKey = api.getPrivateKey(userPassword, userSalt);
       userEthereumAddress = api.privateKeyToAddress(userPrivateKey);
       AsyncStorage.setItem("userPrivateKey", userPrivateKey)
-      //alert("userPrivateKey" +userPrivateKey);
       AsyncStorage.setItem("userEthereumAddress", userEthereumAddress)
       registerApiCall.etherInRegistration(userEthereumAddress,function(err,result){
           if(result){
@@ -138,8 +139,10 @@ registerUser(){
               self.setState({loaderVisible:false})
           }
       });
-    }else{
-      Alert.alert('Alert','No Internet Connections Found.')
+    }
+    else
+    {
+       Alert.alert('Alert','No network available');
     }
   });
 }
@@ -226,18 +229,11 @@ openHomeScreen(){
 }
 _loginWithEmail(){
     Alert.alert("Alert","Comming Soon...")
-    //Actions.home();
-    //this.registerUser();
-    // api.txStatus("0xe3a707ea826ba5991333d4b81c7e5bb8c68ba53072cdc55467e0acd810ab17a3", function(err,result){
-    //   alert('result' +result +" Err" +err)
-    // });
-    //this.setState({loaderVisible:true})
 }
 
 _signUp()
   {
     Alert.alert('Alert','Coming Soon..');
-      //Actions.signUp({fbResponce:this.props.fbLoginResponse});
   }
 
 render()
@@ -245,6 +241,7 @@ render()
     const { fbLoginResponse, actions } = this.props;
     return (
       <BackgroundImage source={require("@Resources/Images/login-bg.png")}>
+      <StatusBar  backgroundColor={statusBarColor} barStyle="light-content" />
         <View style={{flex: 1, alignItems: 'center',backgroundColor:'rgba(0, 0, 0, 0.36)'}}>
           <View style={{flexDirection:'row', marginTop:'28%'}}>
            <Image source={require('@Resources/Images/rabit-white.png')}/>
@@ -285,7 +282,6 @@ render()
             </View>
             </TouchableOpacity>
            }
-
 
             <Spinner overlayColor={ "rgba(0, 0, 0, 0.75)" } visible={this.state.loaderVisible}
              textContent={"Please wait.."} textStyle={{color: '#FFF',fontFamily:"Exo-Regular"}} ></Spinner>

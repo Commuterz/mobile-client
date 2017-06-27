@@ -23,15 +23,25 @@ const styles = StyleSheet.create({
     bottom: 24,
     width:56,
     height:56,
+    backgroundColor:'transparent',
   },
   imageFocusLocation: {
     width: 56,
     height: 56,
+    backgroundColor:'transparent',
+  },
+
+  imageFocusLocationFade: {
+    width: 56,
+    height: 56,
+    opacity:0.4,
+    backgroundColor:'transparent',
   },
   imageMyLocationMarker: {
     width: 52,
     height: 52,
     alignItems: 'center',
+    backgroundColor:'transparent',
   },
   locationAvatarWrapper: {
     height: 42,
@@ -41,20 +51,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 3,
+    backgroundColor:'transparent',
   },
   imageLocationAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor:'transparent',
   },
   calculatingRouteContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor:'transparent',
   },
   imageCalculatingRoute: {
     width: 271,
     height: 271,
+    backgroundColor:'transparent',
   },
   bottomGoContainer: {
     height: 150,
@@ -71,6 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor:'transparent',
   },
   inputText: {
     flex: 1,
@@ -80,12 +95,14 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'flex-start',
+    backgroundColor:'transparent',
   },
   locationAddress: {
     fontFamily: 'Exo-Regular',
     fontSize: 17,
     textAlign:'left',
     width:screenWidth,
+    backgroundColor:'transparent',
   },
   addressViewWrapper: {
     flexDirection: 'row',
@@ -93,30 +110,36 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     height: 44,
     width:screenWidth,
+    backgroundColor:'transparent',
   },
   imageWrapper: {
     width: 54,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft:38
+    marginLeft:38,
+    backgroundColor:'transparent',
   },
   imageSearch: {
     width: 18,
     height: 18,
+    backgroundColor:'transparent',
   },
   imageDesination: {
     width: 24,
     height: 31,
+    backgroundColor:'transparent',
   },
 
   textButton: {
     fontFamily: 'Exo-Medium',
     fontSize: 22,
     color: '#fff',
+    backgroundColor:'transparent',
   },
   imageRabbit: {
     width: 29,
     height: 17,
+    backgroundColor:'transparent',
   },
   buttonWrapper: {
     flexDirection: 'row',
@@ -181,11 +204,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#944b13',
     marginLeft: 4,
+    backgroundColor:'transparent',
   },
   textShop: {
     fontFamily: 'Exo-Medium',
     fontSize: 22,
     color: '#fff',
+      backgroundColor:'transparent',
   },
   topContainer: {
     flexDirection: 'row',
@@ -198,6 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor:'transparent',
   },
   topPaddingContainer: {
     width: 16,
@@ -207,6 +233,7 @@ const styles = StyleSheet.create({
     height: 21,
     fontSize: 16,
     color: '#fff',
+   backgroundColor:'transparent',
   },
   fieldNameContainer: {
     flex: 1,
@@ -222,22 +249,26 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: '#fcea61',
     marginLeft: 5,
+      backgroundColor:'transparent',
   },
   timeFieldContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor:'transparent',
   },
   textTimeValue: {
     fontFamily: 'Exo-Bold',
     fontSize: 20,
     color: '#fff',
     height: 27,
+      backgroundColor:'transparent',
   },
   textTimeLabel: {
     fontFamily: 'Exo-Medium',
     fontSize: 8,
     color: '#929497',
+      backgroundColor:'transparent',
   },
   bottomGoContainer: {
     height: 150,
@@ -255,6 +286,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+
   },
   inputText: {
     flex: 1,
@@ -264,10 +296,12 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'flex-start',
+    backgroundColor:'transparent',
   },
   locationAddress: {
     fontFamily: 'Exo-Regular',
     fontSize: 17,
+    backgroundColor:'transparent',
   },
   line: {
     height: 1,
@@ -291,6 +325,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Exo-Medium',
     fontSize: 22,
     color: '#fff',
+    backgroundColor:'transparent',
   },
   imageRabbit: {
     width: 29,
@@ -311,11 +346,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Exo-Medium',
     fontSize: 25,
     color: '#4595fa',
+      backgroundColor:'transparent',
   },
   textCostOfRideValue: {
     fontFamily: 'Exo-Bold',
     fontSize: 30,
     color: '#4595fa',
+      backgroundColor:'transparent',
   },
   imageDestinationLocationMarker: {
     width: 47,
@@ -334,11 +371,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Exo-Medium',
     fontSize: 12,
     color: '#fff',
+      backgroundColor:'transparent',
   },
   textDistance: {
     fontFamily: 'Exo-Medium',
     fontSize: 18,
     color: '#fff',
+      backgroundColor:'transparent',
   },
   arrow: {
     backgroundColor: 'transparent',
@@ -352,6 +391,7 @@ const styles = StyleSheet.create({
     fontSize:25,
     color: '#4595fa',
     marginTop: 15,
+      backgroundColor:'transparent',
   },
   textSendRequestOne:{
     fontFamily: 'Exo-Regular',
@@ -359,24 +399,28 @@ const styles = StyleSheet.create({
     color: '#929497',
     marginTop: 18,
     textAlign :'center',
+      backgroundColor:'transparent',
   },
   textSendRequestTwo:{
     fontFamily: 'Exo-Regular',
     fontSize:18,
     color: '#929497',
     marginTop: 5,
+      backgroundColor:'transparent',
   },
   textSendRequestApprove:{
     fontFamily: 'Exo-Regular',
     fontSize:14,
     color: '#A9A9A9',
     marginTop: 1,
+      backgroundColor:'transparent',
   },
   textSendRequestTerms:{
     fontFamily: 'Exo-Medium',
     fontSize:14,
     color: '#4595fa',
     marginTop: 1,
+      backgroundColor:'transparent',
   },
   buttonSendRequestApprove:{
     backgroundColor: '#5fdf71',
@@ -400,6 +444,7 @@ const styles = StyleSheet.create({
     textAlign:'center',
     color:'#fff',
     fontSize: 18,
+      backgroundColor:'transparent',
   },
 
   driverBottomRequestContainer: {
@@ -420,13 +465,15 @@ const styles = StyleSheet.create({
     color:'#fff',
     fontSize: 18,
     fontStyle :'italic',
+      backgroundColor:'transparent',
   },
   driverRideTokenAmount:{
     fontFamily: 'Exo-Bold',
     textAlign:'center',
     color:'#fff',
     fontSize: 30,
-    marginTop: -9
+    marginTop: -9,
+      backgroundColor:'transparent',
   },
   driverImageToken:{
     width:16,
@@ -437,7 +484,7 @@ const styles = StyleSheet.create({
     textAlign:'center',
     color:'#fff',
     fontSize: 18,
-
+   backgroundColor:'transparent',
   },
   driverPickupRequestView:{
     backgroundColor: '#5fdf71',
@@ -461,6 +508,7 @@ const styles = StyleSheet.create({
     textAlign:'center',
     color:'#fff',
     fontSize: 24,
+      backgroundColor:'transparent',
   },
   driverAcceptRideBtn:{
     backgroundColor: '#5fdf71',
@@ -475,6 +523,7 @@ const styles = StyleSheet.create({
     flex:1,
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   driverRideApprovedRectangle:{
     height: 103,
@@ -494,7 +543,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#4595fa',
     fontWeight :'600',
-
+  backgroundColor:'transparent',
   },
   rideViewRectangle:{
     width:'45%',
@@ -517,9 +566,10 @@ const styles = StyleSheet.create({
   },
   rideApproveTextTimeDistance:{
     fontFamily: 'Exo-Bold',
-    fontSize: 35,
+    fontSize: 24,
     textAlign: 'center',
     color: '#FFF',
+      backgroundColor:'transparent',
   },
   rideApproveTextMinMiles:{
     fontFamily: 'Exo-Regular',
@@ -528,7 +578,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginTop:10,
     marginLeft:3,
-
+  backgroundColor:'transparent',
   },
 
   offerRideView:{
@@ -575,6 +625,7 @@ const styles = StyleSheet.create({
     bottom: 17,
     width:80,
     height:60,
+    backgroundColor:'transparent',
   },
   imageCallIcon: {
     width: 60,
@@ -604,6 +655,7 @@ const styles = StyleSheet.create({
     flexDirection:'row',
     marginTop:-5,
     marginRight:10,
+
   },
   user_image: {
     height: 60,

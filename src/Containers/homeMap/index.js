@@ -31,7 +31,7 @@ import RaffleEnded from '@Components/RaffleEndedView'
 
 import commonUtility from '@lib/commonUtility.js'
 import BackgroundGeolocation from 'react-native-mauron85-background-geolocation';
-import {getProfileData} from '@lib/constants'
+import {getProfileData,statusBarColor} from '@lib/constants'
 // check location is enable only for android
 import LocationServicesDialogBox from "react-native-android-location-services-dialog-box";
 import BackgroundTimer from 'react-native-background-timer';
@@ -319,7 +319,7 @@ onChangeDesination(text) {
 /*************************Location******************************************************/
 componentWillMount(){
   var self = this;
-    this.checkCurrentScreenActiveToLoad();
+    //this.checkCurrentScreenActiveToLoad();
     AsyncStorage.getItem("currentBalance",(err,balance) => {
       if(!err){
         if(balance !== null){
@@ -327,21 +327,27 @@ componentWillMount(){
         }
       }
     });
-    NetInfo.isConnected.fetch().then(isConnected => {
-     console.log('First, is ' + (isConnected ? 'online' : 'offline'));
-     if(isConnected){
-      //this.setState({loadingWithText:true});
-      this.fetchUserBalanceDispatcher();
-      this.fetchUserProfileData();
-     }else{
-       Alert.alert('Alert','No internet connections found. Please connect and try again.')
-     }
-  });
-  if (Platform.OS === 'android') {
-     this.checkAndroidDeviceLocationEnabled();
-  } else {
-     this.getCurrentLocation();
-  }
+
+    //checking Network is avaialble or not before calling api
+    AsyncStorage.getItem('isNetworkAvailable', (err, result) =>
+    {
+      if(result=='true')
+      {
+        this.fetchUserBalanceDispatcher();
+        this.fetchUserProfileData();
+      }
+      else
+      {
+         Alert.alert('Alert','No network available');
+      }
+    });
+
+    // Check device location in enable in android according to platform
+    if (Platform.OS === 'android') {
+       this.checkAndroidDeviceLocationEnabled();
+    } else {
+       this.getCurrentLocation();
+    }
 
  }
 
@@ -350,7 +356,7 @@ getCurrentLocation(){
    BackgroundGeolocation.configure({
       desiredAccuracy: 10,
       stationaryRadius: 50,
-      distanceFilter:1000,
+      distanceFilter:10,
       locationTimeout: 50,
       notificationTitle: 'Background tracking',
       notificationText: 'enabled',
@@ -371,7 +377,7 @@ getCurrentLocation(){
 
     BackgroundGeolocation.on('location', (location) => {
       var self = this;
-      //console.warn('location',location.latitude);
+      //console.warn('BackgroundGeolocation'+location.latitude);
       if(this.state.locationOnLoad === '0'){
           self.updateStateOfLocation(location);
           this.setState({locationOnLoad:'1'});
@@ -384,7 +390,8 @@ getCurrentLocation(){
             var lastlon = data.longitude;
             commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
               location.latitude, location.longitude,function(distance){
-              //console.warn('distance' + distance)
+              distance = Math.round(distance);
+              console.warn('distance Location' + distance)
               if(distance >= 1){
                 AsyncStorage.setItem("currentLocation",JSON.stringify(location))
                 self.updateStateOfLocation(location);
@@ -427,17 +434,9 @@ updateLastLocationOfDriver(myPosition){
    AsyncStorage.getItem("lastLocation", (errs,result) => {
         if (!errs) {
             if (result !== null) {
-              var data = JSON.parse(result);
-              var lastLat = data.latitude;
-              var lastlon = data.longitude;
-              commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
-                myPosition.latitude,myPosition.longitude,function(distance){
-                if(distance >= 1){
-                   AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
-                   AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
-                   AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
-                }
-              });
+              AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
+              AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
+              AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
             }else{
               AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
             }
@@ -535,7 +534,7 @@ const intervalId = BackgroundTimer.setInterval(() => {
                             Alert.alert('Congratulations','You are a Winner.')
                             var lastBalance = currentBalanceValue + 500;
                             AsyncStorage.setItem("userLastBalance", lastBalance.toString());
-                            this.setState({raffleWinnerView:true});
+                            selfBalance.setState({raffleWinnerView:true});
                          }
                        }else {
                          var lastBalance = currentBalanceValue + 500;
@@ -566,9 +565,11 @@ fetchUserProfileData(){
          {
           if(result)
             {
+                //alert('result' + JSON.stringify(result))
                 /******{"picture": {"data": {"is_silhouette": true,
                       "url": "https://scontent.xx.fbcdn.net/v/t1.0-1/c15.0.50.50/p50x50/1379841_10150004552801901_469209496895221757_n.jpg?oh=d501be4493d45eab9adf54b6b8953587&oe=59A25233"
                     }},  "name": "Ashley Last Synsoft","id": "100005020412363"}*************/
+
                   var profilePic = result.picture.data.url;
                   var name =  result.name;
                   var fbID = result.id;
@@ -605,13 +606,13 @@ fcmTokenAndNotificationHandling(){
         console.log('Token => '+token)
         this.setState({deviceToken:token})
     });
-    FCM.getInitialNotification().then(notif => {
-          if(notif == undefined || notif.body == undefined || notif.body == " "){
-                 return;
-            }
-        //Alert.alert('here...1' + notif.body.type);
-        this.showLocalNotificationForeground(notif);
-    });
+
+  FCM.getInitialNotification().then(notif => {
+        if(notif == undefined || notif.body == undefined || notif.body == " "){
+             return;
+        }
+      this.showLocalNotificationForeground(notif);
+  });
    this.notificationListener = FCM.on(FCMEvent.Notification, async (notif) => {
         // there are two parts of notif. notif.notification contains the notification payload, notif.data contains data payload
     if(notif.local_notification){
@@ -639,10 +640,11 @@ fcmTokenAndNotificationHandling(){
                 break;
             }
           }
-       this.showLocalNotificationForeground(notif);
+
+     this.showLocalNotificationForeground(notif);
   });
 
-     this.refreshTokenListener = FCM.on(FCMEvent.RefreshToken, (token) => {
+  this.refreshTokenListener = FCM.on(FCMEvent.RefreshToken, (token) => {
      console.log(token) // fcm token may not be available on first load, catch it here
      this.setState({deviceToken:token})
    });
@@ -678,14 +680,28 @@ showLocalNotificationForeground(notif) {
           [{text: 'OK', onPress: () => this.rideStartAtRiderSide(body)}, ],
              { cancelable: false } )
 
-      }else if(body.type === 'rideRunningByDriver'){
-         const timeoutId = BackgroundTimer.setTimeout(() => {
-          // this will be executed once after 200 mili seconds
-          // even when app is the the background
-            this.rideStartAtRiderSide(body);
-          }, 200);
-        // Cancel the timeout if necessary
-        BackgroundTimer.clearTimeout(timeoutId);
+      }else if(body.type === 'runningRide'){
+        //  console.warn("<< runningRide");
+        AsyncStorage.getItem("isRideEnded", (errs,result) => {
+          if(!errs){
+            if(result!=null){
+              if(result !== '1'){
+              //  console.warn("<< rideRunningByDriver");
+                this.setState({riderWaitingForPickUp:false});
+                this.setState({searchingForDriver:false});
+                this.setState({rideStartAndPickedUp:true});
+                this.rideStartAtRiderSide(body);
+              }
+            }else{
+            //  console.warn("<< rideRunningByDriver");
+              this.setState({riderWaitingForPickUp:false});
+              this.setState({searchingForDriver:false});
+              this.setState({rideStartAndPickedUp:true});
+              this.rideStartAtRiderSide(body);
+            }
+          }
+        });
+
        }else if(body.type === 'rideAcceptByDriver'){
 
          Alert.alert( 'Ride Accept', 'Your requested ride is accepted.',
@@ -696,10 +712,12 @@ showLocalNotificationForeground(notif) {
          this.setState({riderWaitingForPickUp:false});
 
        }else if(body.type === 'driverEndRide'){
+
         this.setState({riderWaitingForPickUp:false});
         this.setState({searchingForDriver:false});
         this.setState({rideStartAndPickedUp:false});
         this.setState({rateRiderPopup:true});
+        AsyncStorage.setItem("isRideEnded","1");
         AsyncStorage.setItem("rider","rate_driver");
         Alert.alert( 'Ride End', 'Congratulations, you have reached to your destination.',
           [{text: 'OK', onPress: () => console.log('Ride End')}, ],
@@ -749,9 +767,11 @@ calculateRaffleTime(){
    var timedif = new Date(time.valueOf() - 1000);
    var newtime = timedif.toTimeString().split(" ")[0];
    if(newtime === '00:00:00'){
-     Alert.alert( 'Raffle Ended', 'Raffle Time is Ended',
-       [{text: 'OK', onPress: () => this.raffleEndedView()}, ],
-          { cancelable: false } )
+     if(this.state.raffleNotificationView || this.state.raffleWinnerView){
+       Alert.alert( 'Raffle Ended', 'Raffle Time is Ended',
+         [{text: 'OK', onPress: () => this.raffleEndedView()}, ],
+            { cancelable: false } )
+     }
    }else{
      this.setState({raffleTime:newtime})
      // Start a timer that runs once after X milliseconds
@@ -1055,7 +1075,9 @@ rideAcceptViewToRider(body){
       var carName = body.driverCarName;
       var carPlateNumber = body.driverCarPlateNumber;
       var phoneNum = body.driverCallNumber;
+      var sourceAddress = body.sourceAddress;
       this.setState({driverCurrentLocation:driverCurrentLocation})
+      this.setState({driverPickUpSourceAddress:sourceAddress})
       this.setState({riderWaitingForPickUp:false})
       this.setState({driverCarName:carName});
       this.setState({driverCarPlateNumber:carPlateNumber});
@@ -1072,10 +1094,13 @@ rideAcceptViewToRider(body){
       AsyncStorage.setItem("driverProfilePic",driverProfilePic);
       AsyncStorage.setItem("riderTimeToDestination",timeToPickUp);
       AsyncStorage.setItem("riderDistanceRemained",distanceToPickUp);
+
+
     }
 }
 
 rideStartAtRiderSide(body){
+//  console.warn("<< rideStartAtRiderSide" + body.source);
   AsyncStorage.setItem("rider","ride_start");
   if(body === ''){
     console.warn("<< rideStartAtRiderSide if")
@@ -1148,7 +1173,7 @@ rideStartAtRiderSide(body){
             }
       });
   }else{
-      console.warn("<< rideStartAtRiderSide else" + body.source);
+  //  console.warn("<< rideStartAtRiderSide else" + body.source);
     //var body = JSON.parse(notif.body);
     var driverCurrentLocation = body.source;
     var driverName = body.driverName;
@@ -1160,7 +1185,9 @@ rideStartAtRiderSide(body){
     var carName = body.driverCarName;
     var carPlateNumber = body.driverCarPlateNumber;
     var phoneNum = body.driverCallNumber;
-    this.setState({driverCurrentLocation:driverCurrentLocation});
+    var sourceAddress = body.sourceAddress;
+    this.setState({driverCurrentLocation:driverCurrentLocation})
+    this.setState({driverPickUpSourceAddress:sourceAddress})
     this.setState({driverCarName:carName});
     this.setState({driverCarPlateNumber:carPlateNumber});
     this.setState({driverFullName:driverName});
@@ -1168,6 +1195,7 @@ rideStartAtRiderSide(body){
     this.setState({driverProfilePic:driverProfilePic});
     this.setState({riderTimeToDestination:timeRemained});
     this.setState({riderDistanceRemained:distanceRemained});
+
 
     AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(driverCurrentLocation));
     AsyncStorage.setItem("driverCarName",carName);
@@ -1458,6 +1486,7 @@ render()
   {
   return (
         <View style={styles.container}>
+          <StatusBar  backgroundColor={statusBarColor} barStyle="light-content" />
           <HomeTopBar tokenBalance = {this.state.tokenBalance}
             loginProfilePic = {this.state.loginProfilePic}/>
           <PriceTimer/>
@@ -1470,28 +1499,76 @@ render()
              showsCompass={true}
              followUserLocation={true}  showsUserLocation={true} >
 
-             {!this.state.isDriverApp && !this.state.rideStartAndPickedUp &&
-              <MapView.Marker
-                  title='Your location'
-                  coordinate={ this.state.currentLocation }
-                  pinColor='#4595fa'
+            {!this.state.isDriverApp && this.state.riderWaitingForPickUp &&
+              <MapView.Polyline coordinates={[ ...this.state.rideStartRoutePolyline,]}
+                        strokeWidth={4}
+                        strokeColor="orange"
+                        fillColor="rgba(255,0,0,0.5)"
                 />
-              }
-              {this.state.isRiderApp && this.state.rideStartAndPickedUp &&
+            }
+            {!this.state.isDriverApp && this.state.riderWaitingForPickUp && this.state.driverCurrentLocation !='' &&
                 <MapView.Marker
-                        title= 'Your Location'
+                        title= { this.state.driverPickUpSourceAddress }
                         coordinate={ this.state.driverCurrentLocation }
-                        image={require("@Resources/Images/driver-car.png")}
+                      image={require("@Resources/Images/driver-car.png")}
+                  />
+            }
+            {!this.state.isDriverApp && this.state.riderWaitingForPickUp && this.state.currentLocation !='' &&
+                <MapView.Marker
+                      title='Your location'
+                      coordinate={ this.state.currentLocation }
+                      pinColor='#4595fa'
+                  />
+            }
+
+
+            {!this.state.isDriverApp && this.state.rideStartAndPickedUp &&
+              <MapView.Polyline coordinates={[ ...this.state.rideStartRoutePolyline,]}
+                        strokeWidth={4}
+                        strokeColor="orange"
+                        fillColor="rgba(255,0,0,0.5)"
                 />
+            }
+            {!this.state.isDriverApp && this.state.rideStartAndPickedUp && this.state.driverCurrentLocation !='' &&
+                <MapView.Marker
+                        title= { this.state.driverPickUpSourceAddress }
+                        coordinate={ this.state.driverCurrentLocation }
+                      image={require("@Resources/Images/driver-car.png")}
+                  />
+            }
+            {!this.state.isDriverApp && this.state.rideStartAndPickedUp && this.state.currentLocation !='' &&
+                <MapView.Marker
+                      title='Your location'
+                      coordinate={ this.state.currentLocation }
+                      pinColor='#4595fa'
+                  />
+            }
+
+          {!this.state.isDriverApp && this.state.isDestinationRouteDraw &&
+            <MapView.Polyline coordinates={[ ...this.state.routePolylines,]}
+                      strokeWidth={4}
+                      strokeColor="orange"
+                      fillColor="rgba(255,0,0,0.5)"
+              />
+            }
+
+            {!this.state.isDriverApp && this.state.isDestinationRouteDraw && this.state.currentLocation !='' &&
+                  <MapView.Marker
+                        title='Your location'
+                        coordinate={ this.state.currentLocation }
+                        pinColor='#4595fa'
+                    />
               }
-              {!this.state.isDriverApp && !this.state.isDestinationRouteDraw &&
+
+            {!this.state.isDriverApp && !this.state.isDestinationRouteDraw &&
                <MapView.Marker
                    title='Your location'
                    coordinate={ this.state.currentLocation }
                    pinColor='#4595fa'
                  />
                }
-              {this.state.isDestinationRouteDraw &&
+
+              {this.state.isDestinationRouteDraw && this.state.destinationLocation !='' &&
                 <MapView.Marker
                     title= { this.state.destinationAddress }
                      coordinate={ this.state.destinationLocation }
@@ -1499,11 +1576,6 @@ render()
                   />
               }
 
-              <MapView.Polyline coordinates={[ ...this.state.routePolylines,]}
-                        strokeWidth={4}
-                        strokeColor="orange"
-                        fillColor="rgba(255,0,0,0.5)"
-                />
               {this.state.driverRideRequest &&
                   <MapView.Polyline coordinates={[ ...this.state.riderRequestPolyline,]}
                             strokeWidth={4}
@@ -1688,10 +1760,10 @@ render()
              closeOnTouchOutside={false} haveOverlay={true} closeOnHardwareBackPress={false} width="95%" height="95%">
              <View style={{flexDirection:'column',}}>
              <View style={{height:50,justifyContent:'center',alignItems:'center',flexDirection:'row',backgroundColor:'#4595fa',}}>
-                <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:18,color:'#FFF'}}>Terms and Conditions </Text>
+                <Text style={{fontFamily: 'Exo-Regular',  backgroundColor:'transparent',textAlign:'center',fontSize:18,color:'#FFF'}}>Terms and Conditions </Text>
                 <View style={{right:5,position:'absolute'}}>
                 <TouchableHighlight onPress={this.closeTermsDialog.bind(this)}>
-                 <Text style={{fontFamily: 'Exo-Regular',textAlign:'center',fontSize:16,color:'#FFF'}}>Close</Text>
+                 <Text style={{fontFamily: 'Exo-Regular',  backgroundColor:'transparent',textAlign:'center',fontSize:16,color:'#FFF'}}>Close</Text>
                  </TouchableHighlight>
                  </View>
                </View>
@@ -1760,21 +1832,23 @@ get renderMyLocationButton() {
           </TouchableHighlight>
         );
     }else if(this.state.isCalculatedResult && this.state.rideStartAndPickedUp){
+        return(
       <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon }>
         <Image source={ require("@Resources/Images/ride-start-icon.png") } style={ styles.imageCallIcon }/>
       </TouchableHighlight>
-    }else if(this.state.isCalculatedResult){
+      );
+    }else if(this.state.isDestinationRouteDraw){
+      return(
+        <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonMyLocation } >
+            <Image source={ require("@Resources/Images/focusLocation.png") } style={ styles.imageFocusLocationFade }/>
+        </TouchableHighlight>
+      );
+    }else if(!this.state.isCalculatedResult){
         return(
           <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
               <Image source={ require("@Resources/Images/focusLocation.png") } style={ styles.imageFocusLocation }/>
           </TouchableHighlight>
         );
-    }else{
-      return(
-        <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonMyLocation } onPress={this.onChangeLocation.bind(this)} >
-            <Image source={ require("@Resources/Images/focusLocation.png") } style={ styles.imageFocusLocation }/>
-        </TouchableHighlight>
-      );
     }
   }
 }
@@ -1814,38 +1888,62 @@ get renderBottomContent(){
                    <View style={{flexDirection:'row' , backgroundColor:'#FFF',height:65,justifyContent:'center',alignItems:'center'}}>
                       <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                         <Image source={ require("@Resources/Images/driver-location.png")  } style={ styles.driveImageToken }/>
-                          <Text  numberOfLines={2} style={{width:100,fontFamily: 'Exo-Medium', fontSize:14, color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpSourceAddress}</Text>
+                          <Text  numberOfLines={2} style={{width:100,fontFamily: 'Exo-Medium',   backgroundColor:'transparent',fontSize:14, color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpSourceAddress}</Text>
                         </View>
                       <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                         <Image source={ require("@Resources/Images/destination-icon-driver.png")  } style={ styles.driveImageToken }/>
-                        <Text  numberOfLines={2}  style={{width:100,fontFamily: 'Exo-Medium', fontSize:14, color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpDestinationAddress} </Text>
+                        <Text  numberOfLines={2}  style={{width:100,fontFamily: 'Exo-Medium',   backgroundColor:'transparent',fontSize:14, color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpDestinationAddress} </Text>
                       </View>
                    </View>
                    <View style={{flexDirection:'row' , backgroundColor:'#FFF',height:65,justifyContent:'center',alignItems:'center'}}>
                     <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                        <Image source={ require("@Resources/Images/clock.png")  } style={ styles.driveImageToken }/>
-                     <Text style={{width:100,fontFamily: 'Exo-Medium',  fontSize:20,color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpTime} </Text>
+                     <Text style={{width:100,fontFamily: 'Exo-Medium',   backgroundColor:'transparent', fontSize:20,color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpTime} </Text>
                      </View>
                        <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                      <Image source={ require("@Resources/Images/path-icon.png")  } style={ styles.driveImageToken }/>
-                       <Text style={{width:100,fontFamily: 'Exo-Medium',  fontSize:20,color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpDistance} </Text>
+                       <Text style={{width:100,fontFamily: 'Exo-Medium',   backgroundColor:'transparent', fontSize:20,color:'#9b9b9b',marginLeft:10}} >{this.state.driverPickUpDistance} </Text>
                        </View>
               </View>
               </View>
               <View style={{flexDirection:'row', justifyContent:'center',height:50,bottom:0}}>
                    <View style ={styles.driverAcceptRideBtn}>
                         <TouchableHighlight  onPress={this.acceptRideRequest.bind(this)} >
-                            <Text style={{fontFamily: 'Exo-Medium',  textAlign:'center',color:'#fff',fontSize: 20,}} > Accept Ride </Text>
+                            <Text style={{fontFamily: 'Exo-Medium',   backgroundColor:'transparent', textAlign:'center',color:'#fff',fontSize: 20,}} > Accept Ride </Text>
                         </TouchableHighlight>
                       </View>
                       <View style ={styles.driverDeclineRideBtn}>
                          <TouchableHighlight  onPress={this.declineRideRequest.bind(this)} >
-                             <Text style={{fontFamily: 'Exo-Medium',  textAlign:'center',color:'#fff',fontSize: 20,}} > Decline Ride </Text>
+                             <Text style={{fontFamily: 'Exo-Medium',   backgroundColor:'transparent', textAlign:'center',color:'#fff',fontSize: 20,}} > Decline Ride </Text>
                          </TouchableHighlight>
                     </View>
               </View>
             </View>
           );
+      }else if(this.state.isDriverApprovedRide && this.state.driverStartedRide){
+        return(
+          <View style={styles.driverRideApprovedRectangle}>
+          <View style={{flexDirection:'column' , height:40}}>
+            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+             <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Time to Destination </Text>
+              <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Distance Remained</Text>
+            </View>
+            </View>
+            <View style={{flexDirection:'column', height:63}}>
+            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                <View style={styles.rideViewRectangle}>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeToPickUpByDriver}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
+                </View>
+                <View style={styles.rideViewRectangleRight}>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.distanceToPickByDriver}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
+                </View>
+            </View>
+              </View>
+          </View>
+        );
+
       }else if(this.state.isDriverApprovedRide){
           return(
             <View style={styles.driverRideApprovedRectangle}>
@@ -1858,46 +1956,22 @@ get renderBottomContent(){
               <View style={{flexDirection:'column', height:63}}>
               <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                   <View style={styles.rideViewRectangle}>
-                  <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.timeToPickUpByDriver}</Text>
+                  <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeToPickUpByDriver}</Text>
                   <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
                   </View>
                   <View style={styles.rideViewRectangleRight}>
-                  <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.distanceToPickByDriver}</Text>
+                  <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.distanceToPickByDriver}</Text>
                   <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
                   </View>
               </View>
                 </View>
             </View>
           );
-      }else if(this.state.driverStartedRide){
-        return(
-          <View style={styles.driverRideApprovedRectangle}>
-          <View style={{flexDirection:'column' , height:40}}>
-            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-             <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Time to Destination </Text>
-              <Text numberOfLines={1}  style={styles.rideApproveTimePickUp}>Distance Remained</Text>
-            </View>
-            </View>
-            <View style={{flexDirection:'column', height:63}}>
-            <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-                <View style={styles.rideViewRectangle}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderTimeToDestination}</Text>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
-                </View>
-                <View style={styles.rideViewRectangleRight}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderDistanceRemained}</Text>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
-                </View>
-            </View>
-              </View>
-          </View>
-        );
-
       }else if(this.state.rateDriverPopup){
             return(
               <View style={styles.rateRectangle}>
               <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
-              <Text style={{fontSize:20,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>You Have Reached Your Destination </Text>
+              <Text style={{fontSize:20,color:'#fff',  backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>You Have Reached Your Destination </Text>
               </View>
               <View style={{height:85,justifyContent:'center',alignItems:'center'}}>
               <Stars
@@ -1908,11 +1982,11 @@ get renderBottomContent(){
                 rate={0}
                 size={45}
               />
-               <Text style={{fontSize:16,color:'#9b9b9b',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
+               <Text style={{fontSize:16,color:'#9b9b9b',  backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
               </View>
               <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
               <TouchableHighlight activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
-                  <Text style={{fontSize:22,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
+                  <Text style={{fontSize:22,color:'#fff',  backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
               </TouchableHighlight>
               </View>
              </View>
@@ -1954,7 +2028,7 @@ get renderBottomContent(){
         return(
           <View style={ styles.bottomWaitAndCancelContainer }>
             <View style={{width:screenWidth, height:20,justifyContent:'center',alignItems:'center' }}>
-                <Text style={{fontFamily: 'Exo-Regular',fontSize: 14, color: '#333',}}>Please wait searching for driver</Text>
+                <Text style={{fontFamily: 'Exo-Regular',  backgroundColor:'transparent',fontSize: 14, color: '#333',}}>Please wait searching for driver</Text>
              </View>
               <View style={ styles.userPrizeContainer }>
                 <Text style={ styles.textCostOfRide }>Cost Of Ride: </Text>
@@ -1982,11 +2056,11 @@ get renderBottomContent(){
             <View style={{flexDirection:'column', height:63}}>
             <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                 <View style={styles.rideViewRectangle}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderTimeToDestination}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.riderTimeToDestination}</Text>
                 <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
                 </View>
                 <View style={styles.rideViewRectangleRight}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderDistanceRemained}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.riderDistanceRemained}</Text>
                 <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
                 </View>
             </View>
@@ -2005,11 +2079,11 @@ get renderBottomContent(){
             <View style={{flexDirection:'column', height:63}}>
             <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                 <View style={styles.rideViewRectangle}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderTimeToDestination}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.riderTimeToDestination}</Text>
                 <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.timeValueInText}</Text>
                 </View>
                 <View style={styles.rideViewRectangleRight}>
-                <Text  numberOfLines={1}  style={styles.rideApproveTextTimeDistance}>{this.state.riderDistanceRemained}</Text>
+                <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>{this.state.riderDistanceRemained}</Text>
                 <Text  numberOfLines={1}  style={styles.rideApproveTextMinMiles}>miles</Text>
                 </View>
             </View>
@@ -2020,7 +2094,7 @@ get renderBottomContent(){
       return(
           <View style={styles.rateRectangle}>
           <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
-          <Text style={{fontSize:20,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>You Have Reached Your Destination </Text>
+          <Text style={{fontSize:20,color:'#fff', backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>You Have Reached Your Destination </Text>
           </View>
           <View style={{height:85,justifyContent:'center',alignItems:'center'}}>
           <Stars
@@ -2031,11 +2105,11 @@ get renderBottomContent(){
             rate={0}
             size={45}
           />
-           <Text style={{fontSize:16,color:'#9b9b9b',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
+           <Text style={{fontSize:16,color:'#9b9b9b',  backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>Rate This Ride</Text>
           </View>
           <View style={{height:50,backgroundColor:'#5fdf71',justifyContent:'center'}}>
           <TouchableHighlight activeOpacity={ .5 } onPress={this.rateAndEndRideDriver.bind(this) }>
-              <Text style={{fontSize:22,color:'#fff',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
+              <Text style={{fontSize:22,color:'#fff',  backgroundColor:'transparent',fontFamily:'Exo-Medium',textAlign:'center'}}>End Ride</Text>
           </TouchableHighlight>
           </View>
          </View>
@@ -2179,7 +2253,7 @@ approveRideRequestPopup(){
 
 closeRiderRequestPopUp(){
   this.driverPopupDialog.dismiss();
-  this.rideAcceptRequestNotification();
+  this.getTimeAndDistanceRemainedUsingDirectionAPI('rideAcceptByDriver');
   this.setState({loaderVisible: false});
   this.setState({openRideRequestPopup:false});
   this.setState({isDriverApprovedRide:true});
@@ -2189,6 +2263,138 @@ closeRiderRequestPopUp(){
   //     // even when app is the the background
   //     this.checkDriverReachNearToRider('rideStartByDriver')
   // }, 5000);
+}
+
+
+checkDriverReachNearToRider(value){
+  //console.warn("checking checkDriverReachNearToRider")
+  var driverCurrentLocation = this.state.currentLocation;
+  var riderCurrentLocation = this.state.driverPickUpSource;
+  var self = this;
+  commonUtility.getDistanceFromLatLonInKm(driverCurrentLocation.latitude,driverCurrentLocation.longitude,
+    riderCurrentLocation.latitude,riderCurrentLocation.longitude,function(distance){
+    if(distance >= 1){ //distance 1 km
+      // Cancel the timer when you are done with it
+      BackgroundTimer.clearInterval(refreshIntervalId);
+      self.startRide(value);
+    }else{
+      Alert.alert('Alert','Ride can not be start as you are not in the range of 100 m from rider location.')
+    }
+  });
+}
+
+startRideOnButton(){
+  BackgroundTimer.clearInterval(refreshIntervalId);
+  Alert.alert('Ride Start', 'You have reached rider location.', [
+   {text: 'Ok', onPress: () => console.log('rider location') },
+   ], { cancelable: false } )
+  this.setState({isRideStarted:true});
+  this.setState({riderWaitingForPickUp:false})
+  this.setState({driverStartedRide:true});
+  var isFirst = true;
+  rideStartLocationInterval = BackgroundTimer.setInterval(() => {
+      // this will be executed every 1 sec
+      // even when app is the the background
+      if(isFirst){
+          this.getTimeAndDistanceRemainedUsingDirectionAPI('rideStartByDriver');
+          isFirst = false;
+      }else{
+        this.checkLastLocationOfDriverAndSendCurrentLocation('runningRide');
+      }
+  }, 500);
+  AsyncStorage.setItem("driver","ride_start");
+}
+
+startRide(value){
+  AsyncStorage.setItem("driver","ride_start");
+  Alert.alert('Ride Start','You have reached rider location.');
+  this.setState({isRideStarted:true});
+  this.setState({riderWaitingForPickUp:false})
+  this.setState({driverStartedRide:true});
+  rideStartLocationInterval = BackgroundTimer.setInterval(() => {
+      // this will be executed every 1 sec
+      // even when app is the the background
+      if(value === 'rideStartByDriver'){
+        this.checkLastLocationOfDriverAndSendCurrentLocation(value);
+        value = ''
+      }else{
+        this.checkLastLocationOfDriverAndSendCurrentLocation('runningRide');
+      }
+
+  }, 30000);
+}
+
+checkLastLocationOfDriverAndSendCurrentLocation(value){
+  var self = this;
+  AsyncStorage.getItem("lastLocation", (errs,result) => {
+       if (!errs) {
+           if (result !== null) {
+            // console.warn('>> result'+result)
+             var data = JSON.parse(result);
+             var lastLat = data.latitude;
+             var lastlon = data.longitude;
+             var currentLocation = this.state.currentLocation;
+             //console.warn('lat'+data.latitude +" == " + currentLocation.latitude)
+             commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,currentLocation.latitude,currentLocation.longitude,function(distance){
+                console.warn('driver distance'+distance);
+                 distance = Math.round(distance);
+                 console.warn('driver distance'+distance);
+                 // if distance becomes greater 1 km then send update to rider.
+                 //if(distance >=1){
+                   //self.sendNotifToRiderAboutRideStart();
+                   self.getTimeAndDistanceRemainedUsingDirectionAPI(value);
+                 //}
+             });
+           }
+        }
+   });
+}
+
+getTimeAndDistanceRemainedUsingDirectionAPI(value){
+  var self =this;
+  var  routeway=[];
+  var driverCurrentLocation = this.state.currentLocation;
+  var toLoc =driverCurrentLocation.latitude+"," + driverCurrentLocation.longitude;
+  this.setState({driverCurrentLocation:this.state.currentLocation})
+
+  var riderLocation = this.state.driverPickUpSource;
+  var riderWayPoint = riderLocation.latitude +"," + riderLocation.longitude;
+
+  var riderDestination = this.state.driverPickUpDestination;
+  var fromLoc = riderDestination.latitude+"," + riderDestination.longitude;
+
+  routeCall.findRouteBtwSourceAnDestinationWithWayPoint(toLoc,fromLoc,riderWayPoint,function(responseJson){
+      if(responseJson){
+        if (responseJson.routes.length) {
+           for(var i=0; i<responseJson.routes.length;i++){
+              var routesList = responseJson.routes[i];
+               //for(var j=0; j<routesList.legs.length; j++){
+                 var legsList;
+                 if(value === 'rideAcceptByDriver'){
+                    legsList = routesList.legs[0];
+                 }else{
+                    legsList = routesList.legs[1];
+                 }
+                 var distanceVal = legsList.distance.value;
+                 var time = legsList.duration.value;
+                 var disMiles = distanceVal / 1609.344;
+                 disMiles = parseFloat(Math.round(disMiles * 100) / 100).toFixed(2) +"";
+                 console.warn("time" , time +" ==  "+ legsList.duration.text +" dis" + disMiles +" == "+ legsList.distance.text );
+                 self.setState({distanceToPickByDriver:disMiles})
+                 self.setState({timeToPickUpByDriver:self.getTimeFromGoogleValue(time)})
+               //}
+           }
+           if(value === 'rideAcceptByDriver'){
+               self.rideAcceptRequestNotification();
+           }else{
+               self.sendNotifToRiderAboutRideStart(value);
+           }
+
+        }
+      }else{
+        Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+      }
+  });
 }
 
 rideAcceptRequestNotification(){
@@ -2220,118 +2426,6 @@ rideAcceptRequestNotification(){
      }).done();
 }
 
-checkDriverReachNearToRider(value){
-  //console.warn("checking checkDriverReachNearToRider")
-  var driverCurrentLocation = this.state.currentLocation;
-  var riderCurrentLocation = this.state.driverPickUpSource;
-  var self = this;
-  commonUtility.getDistanceFromLatLonInKm(driverCurrentLocation.latitude,driverCurrentLocation.longitude,
-    riderCurrentLocation.latitude,riderCurrentLocation.longitude,function(distance){
-    if(distance >= 1){ //distance 1 km
-      // Cancel the timer when you are done with it
-      BackgroundTimer.clearInterval(refreshIntervalId);
-      self.startRide(value);
-    }else{
-      Alert.alert('Alert','Ride can not be start as you are not in the range of 100 m from rider location.')
-    }
-  });
-}
-
-startRideOnButton(){
-  BackgroundTimer.clearInterval(refreshIntervalId);
-  Alert.alert('Ride Start', 'You have reached rider location.', [
-   {text: 'Ok', onPress: () => console.log('rider location') },
-   ], { cancelable: false } )
-  this.setState({isRideStarted:true});
-  this.setState({riderWaitingForPickUp:false})
-  this.setState({driverStartedRide:true});
-  this.getTimeAndDistanceRemainedUsingDirectionAPI('rideStartByDriver');
-  rideStartLocationInterval = BackgroundTimer.setInterval(() => {
-      // this will be executed every 1 sec
-      // even when app is the the background
-      this.checkLastLocationOfDriverAndSendCurrentLocation('runningRide');
-  }, 1000);
-  AsyncStorage.setItem("driver","ride_start");
-}
-
-startRide(value){
-  AsyncStorage.setItem("driver","ride_start");
-  Alert.alert('Ride Start','You have reached rider location.');
-  this.setState({isRideStarted:true});
-  this.setState({riderWaitingForPickUp:false})
-  this.setState({driverStartedRide:true});
-  rideStartLocationInterval = BackgroundTimer.setInterval(() => {
-      // this will be executed every 1 sec
-      // even when app is the the background
-      if(value === 'rideStartByDriver'){
-        this.checkLastLocationOfDriverAndSendCurrentLocation(value);
-        value = ''
-      }else{
-        this.checkLastLocationOfDriverAndSendCurrentLocation('rideRunningByDriver');
-      }
-
-  }, 1000);
-}
-
-checkLastLocationOfDriverAndSendCurrentLocation(value){
-  var self = this;
-  AsyncStorage.getItem("lastLocation", (errs,result) => {
-       if (!errs) {
-           if (result !== null) {
-             var data = JSON.parse(result);
-             var lastLat = data.latitude;
-             var lastlon = data.longitude;
-             commonUtility.getDistanceFromLatLonInKm(this.state.currentLocation,this.state.destinationLocation,
-               lastLat,lastlon,function(distance){
-                 // if distance becomes greater 1 km then send update to rider.
-               if(distance >=1){
-                 //self.sendNotifToRiderAboutRideStart();
-                 self.getTimeAndDistanceRemainedUsingDirectionAPI(value);
-               }
-             });
-           }
-        }
-   });
-}
-
-getTimeAndDistanceRemainedUsingDirectionAPI(value){
-  var self =this;
-  var  routeway=[];
-  var driverCurrentLocation = this.state.currentLocation;
-  var toLoc =driverCurrentLocation.latitude+"," + driverCurrentLocation.longitude;
-  this.setState({driverCurrentLocation:this.state.currentLocation})
-
-  var riderLocation = this.state.driverPickUpSource;
-  var riderWayPoint = riderLocation.latitude +"," + riderLocation.longitude;
-
-  var riderDestination = this.state.driverPickUpDestination;
-  var fromLoc = riderDestination.latitude+"," + riderDestination.longitude;
-  routeCall.findRouteBtwSourceAnDestinationWithWayPoint(toLoc,fromLoc,riderWayPoint,function(responseJson){
-      if(responseJson){
-        if (responseJson.routes.length) {
-           for(var i=0; i<responseJson.routes.length;i++){
-              var routesList = responseJson.routes[i];
-               for(var j=0; j<routesList.legs.length; j++){
-                 var legsList = routesList.legs[j];
-                 var distanceVal = legsList.distance.value;
-                 var time = legsList.duration.value;
-                 var disMiles = distanceVal / 1609.344;
-                 disMiles = parseFloat(Math.round(disMiles * 100) / 100).toFixed(2) +"";
-                 console.warn("time" , time +" ==  "+ legsList.duration.text +" dis" + disMiles +" == "+ legsList.distance.text );
-
-                 self.setState({distanceToPickByDriver:disMiles})
-                 self.setState({timeToPickUpByDriver:self.getTimeFromGoogleValue(time)})
-               }
-           }
-          self.sendNotifToRiderAboutRideStart(value);
-        }
-      }else{
-        Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
-      }
-  });
-}
-
-
 sendNotifToRiderAboutRideStart(value){
   console.warn('Value Is Ride Started or Runnning' + value)
   var jsonData = JSON.stringify(
@@ -2348,7 +2442,7 @@ sendNotifToRiderAboutRideStart(value){
         driverIPFS:this.state.userProfileIPFS,
         driverName : this.state.loginName,
         driverProfilePic: this.state.loginProfilePic,
-        type: value, // value can be rideStartByDriver or rideRunningByDriver
+        type: value, // value can be rideStartByDriver or runningRide
         driverCarName:this.state.driverCarName,
         driverCarPlateNumber:this.state.driverCarPlateNumber,
         driverCallNumber:this.state.driverCallNumber,
@@ -2469,23 +2563,32 @@ callDriver(){
 }
 
 getTimeFromGoogleValue(time){
-  var googleTime = Math.round(time);
-  var hours   = Math.floor(googleTime / 3600);
-  var minutes = Math.floor((googleTime - (hours * 3600)) / 60);
-  var seconds = googleTime - (hours * 3600) - (minutes * 60);
+  var d = Number(time);
+  var h = Math.floor(d / 3600);
+  var m = Math.floor(d % 3600 / 60);
+  var s = Math.floor(d % 3600 % 60);
+
+  var hDisplay = h > 0 ? h + (h == 1 ? " hr" : " hrs") : "";
+  var mDisplay = m > 0 ? m + (m == 1 ? " min" : " mins"): "";
+  var sDisplay = s > 0 ? s + (s == 1 ? " sec" : " secs") : "";
+
+ //console.warn('h' + h + 'm' + m + 's' + s)
   var actualTime ='';
-  if (hours   < 10) {
-    actualTime   = hours;
-    this.setState({timeValueInText:'hr'})
+  if(h > 0 && m > 0){
+    actualTime = hDisplay + ":" + mDisplay
+    this.setState({timeValueInText:''})
+  }else if(h > 0  && m == 0){
+    actualTime = hDisplay;
+    this.setState({timeValueInText:'' })
+  }else if(m > 0 ){
+    actualTime = mDisplay;
+    this.setState({timeValueInText:'' })
+  }else if(m == 0 && s >= 0){
+    actualTime = sDisplay;
+    this.setState({timeValueInText:'' })
   }
-  if (minutes < 10) {
-    actualTime = minutes;
-    this.setState({timeValueInText:'min'})
-  }
-  if (seconds < 10) {
-    actualTime = seconds;
-    this.setState({timeValueInText:'sec'})
-  }
+
+  console.warn('actualTime' + actualTime)
   return actualTime;
 }
 /***********************Extra Functions***********************************/

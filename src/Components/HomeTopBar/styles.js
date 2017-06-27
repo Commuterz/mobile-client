@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+
   topBarContentWrapper: {
     flex: 1,
     marginHorizontal: 12,
@@ -62,10 +63,8 @@ const styles = StyleSheet.create({
   },
   textToken: {
     fontFamily: 'Exo-Medium',
-    fontSize: 22,
+    fontSize: 20,
     color: '#944b13',
-    marginLeft: 4,
-    width:'60%'
   },
   shopContainer: {
     flex: 1,

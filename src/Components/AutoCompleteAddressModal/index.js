@@ -3,6 +3,7 @@ import {StyleSheet,View,Image,TextInput,Keyboard,Alert,Dimensions,TouchableOpaci
 var {GooglePlacesAutocomplete} = require('react-native-google-places-autocomplete');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const ASPECT_RATIO = screenWidth / screenHeight;
+import {statusBarColor} from '@lib/constants'
 
 export default class AutoCompleteAddressModel extends Component {
   static defaultProps = {
@@ -26,7 +27,9 @@ export default class AutoCompleteAddressModel extends Component {
   {
     return (
       <View style={{ flex:1 }}>
-           <View style={{height:0,backgroundColor:'rgba(38,164,206,1)'}}></View>
+          {Platform === 'ios' &&
+          <View style={{height:20,backgroundColor:'rgba(38,164,206,1)'}}></View>
+          }
            <GooglePlacesAutocomplete
             placeholder='Search'
             istViewDisplayed='auto'
