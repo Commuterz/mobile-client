@@ -130,20 +130,11 @@ registerUser(){
       userEthereumAddress = api.privateKeyToAddress(userPrivateKey);
       AsyncStorage.setItem("userPrivateKey", userPrivateKey)
       AsyncStorage.setItem("userEthereumAddress", userEthereumAddress)
-      registerApiCall.etherInRegistration(userEthereumAddress,function(err,result){
-          if(result){
-              //alert("etherInRegistration" +result);
-              self.checkIsAlreadyRegister(userEthereumAddress);
-            }else{
-              Alert.alert("Alert","Error in registration.\n" +err)
-              self.setState({loaderVisible:false})
-          }
-      });
+      this.checkIsAlreadyRegister(userEthereumAddress);
+    }else{
+        Alert.alert("Alert","No Internet Connection Found!!" );
     }
-    else
-    {
-       Alert.alert('Alert','No network available');
-    }
+
   });
 }
 
@@ -159,7 +150,15 @@ checkIsAlreadyRegister(userEthereumAddress){
           self.addUserDataAndGetIPFS('1');//1 for user is already register
       }else{
         //alert("You are not registered user of commuterz");
-        self.addUserDataAndGetIPFS('0');//0 for user is not  register
+          registerApiCall.etherInRegistration(userEthereumAddress,function(err,result){
+              if(result){
+                  self.addUserDataAndGetIPFS('0');//0 for user is not  register
+                }else{
+                  Alert.alert("Alert","Error in registration.\n" +err)
+                  self.setState({loaderVisible:false})
+              }
+          });
+
       }
     }
 

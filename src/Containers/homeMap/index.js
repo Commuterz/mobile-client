@@ -157,6 +157,7 @@ export default class Home extends Component
       driverPickUpDistance:'',
       driverRideRequest:false,
       isDriverApprovedRide:false,
+      lastLocationDistance:'0',
 
 
       //raffleStates
@@ -195,6 +196,7 @@ componentDidMount() {
     AsyncStorage.getItem("userEthereumAddress", (errs,result) => {
          if (!errs) {
              if (result !== null) {
+                 console.log('userEthereumAddress'+result)
                  this.setState({userEthereumAddress:result});
              }
           }
@@ -308,7 +310,7 @@ onChangeLocation(text) {
                           latitudeDelta: 0.0922,longitudeDelta: 0.0421}});
           this._addressFromCoordinates(position.coords.latitude,position.coords.longitude);
            this._map.animateToCoordinate(tempCoords, 1);
-         }, function (error) { alert(error) },
+         }, function (error) { Alert.alert('Alert','Unable to get location.') },
     );
 }
 
@@ -391,8 +393,9 @@ getCurrentLocation(){
             commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,
               location.latitude, location.longitude,function(distance){
               distance = Math.round(distance);
-              console.warn('distance Location' + distance)
+              //console.warn('distance Location' + distance)
               if(distance >= 1){
+                self.setState({lastLocationDistance:distance.toString()})
                 AsyncStorage.setItem("currentLocation",JSON.stringify(location))
                 self.updateStateOfLocation(location);
               }
@@ -1454,7 +1457,7 @@ riderRequest(){
          riderFBId : this.state.loginFBID,
 
      })
-   console.warn('jsonData' +JSON.stringify(jsonData));
+   //console.warn('jsonData' +JSON.stringify(jsonData));
    webAPICall.postApiWithJosnDataInMainThread(riderURL,jsonData,'POST').then((responseJson) =>
     {
      if(responseJson)
@@ -2236,7 +2239,7 @@ cleanAllStatesAndOpenHome(){
  this.setState({rideStartAndPickedUp:false});
  this.setState({destinationAddress:'My Destination Address'})
  this.setState({driverStartedRide:false})
-  AsyncStorage.setItem("type","home");
+AsyncStorage.setItem("type","home");
 
 }
 //approve on popup button ride request and update same to server with rideId
@@ -2325,29 +2328,30 @@ startRide(value){
 }
 
 checkLastLocationOfDriverAndSendCurrentLocation(value){
-  var self = this;
-  AsyncStorage.getItem("lastLocation", (errs,result) => {
-       if (!errs) {
-           if (result !== null) {
-            // console.warn('>> result'+result)
-             var data = JSON.parse(result);
-             var lastLat = data.latitude;
-             var lastlon = data.longitude;
-             var currentLocation = this.state.currentLocation;
-             //console.warn('lat'+data.latitude +" == " + currentLocation.latitude)
-             commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,currentLocation.latitude,currentLocation.longitude,function(distance){
-                console.warn('driver distance'+distance);
-                 distance = Math.round(distance);
-                 console.warn('driver distance'+distance);
-                 // if distance becomes greater 1 km then send update to rider.
-                 //if(distance >=1){
-                   //self.sendNotifToRiderAboutRideStart();
-                   self.getTimeAndDistanceRemainedUsingDirectionAPI(value);
-                 //}
-             });
-           }
-        }
-   });
+  //var self = this;
+  // AsyncStorage.getItem("lastLocation", (errs,result) => {
+  //      if (!errs) {
+  //          if (result !== null) {
+  //           // console.warn('>> result'+result)
+  //            var data = JSON.parse(result);
+  //            var lastLat = data.latitude;
+  //            var lastlon = data.longitude;
+  //            var currentLocation = this.state.currentLocation;
+  //            //console.warn('lat'+data.latitude +" == " + currentLocation.latitude)
+  //            commonUtility.getDistanceFromLatLonInKm(lastLat,lastlon,currentLocation.latitude,currentLocation.longitude,function(distance){
+  //                distance = Math.round(distance);
+  //                // if distance becomes greater 1 km then send update to rider.
+  //                if(distance >=1){
+  //                  self.getTimeAndDistanceRemainedUsingDirectionAPI(value);
+  //                }
+  //            });
+  //          }
+  //       }
+  //  });
+
+  if(this.state.lastLocationDistance >= '1'){
+     this.getTimeAndDistanceRemainedUsingDirectionAPI(value);
+  }
 }
 
 getTimeAndDistanceRemainedUsingDirectionAPI(value){
@@ -2421,7 +2425,7 @@ rideAcceptRequestNotification(){
     {
      if(responseJson)
        {
-           console.warn(JSON.stringify(responseJson));
+           //console.warn(JSON.stringify(responseJson));
          }
      }).done();
 }
@@ -2456,6 +2460,7 @@ callDriverRequestApiForNotifyingRider(jsonData){
   {
    if(responseJson)
      {
+
          console.warn(JSON.stringify(responseJson));
        }
    }).done();
@@ -2466,7 +2471,6 @@ rideEndByDriver(){
   var self=this;
   driverApiCall.rideEndByDriver(this.state.userPrivateKey,this.state.rideIdGetByDriver,function(err,result){
       if(result){
-
           self.showRateViewForDriver();
       }else{
         Alert.alert("Alert","Something went wrong while ending your ride." +err);
@@ -2480,6 +2484,8 @@ showRateViewForDriver(){
   this.setState({driverStartedRide:false});
   this.setState({isRideStarted:false})
   this.setState({rateRiderPopup:true})
+
+
   this.setState({isDriverApprovedRide:false})
   this.setState({rateDriverPopup:true})
   this.setState({loaderVisible:false});
@@ -2588,7 +2594,7 @@ getTimeFromGoogleValue(time){
     this.setState({timeValueInText:'' })
   }
 
-  console.warn('actualTime' + actualTime)
+//  console.warn('actualTime' + actualTime)
   return actualTime;
 }
 /***********************Extra Functions***********************************/
