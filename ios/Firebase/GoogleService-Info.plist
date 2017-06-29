@@ -7,9 +7,9 @@
 	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
 	<string>ca-app-pub-3940256099942544/4411468910</string>
 	<key>CLIENT_ID</key>
-	<string>506631520738-epuhi6hhceo12tpedklona5j2fcojo56.apps.googleusercontent.com</string>
+	<string>506631520738-8d74m01b26f7lcnjpedqu7u3vqpbqal1.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.506631520738-epuhi6hhceo12tpedklona5j2fcojo56</string>
+	<string>com.googleusercontent.apps.506631520738-8d74m01b26f7lcnjpedqu7u3vqpbqal1</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAHXt8uGMqbCD-9Vsz_5ERm6ss3X7-cWdo</string>
 	<key>GCM_SENDER_ID</key>
@@ -17,7 +17,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.synsoftglobal.Commuterz</string>
+	<string>com.app.commuterz</string>
 	<key>PROJECT_ID</key>
 	<string>commuterz-5d5ad</string>
 	<key>STORAGE_BUCKET</key>
@@ -33,7 +33,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:506631520738:ios:f022a51f279bbf56</string>
+	<string>1:506631520738:ios:cd24975871d13ba2</string>
 	<key>DATABASE_URL</key>
 	<string>https://commuterz-5d5ad.firebaseio.com</string>
 </dict>
