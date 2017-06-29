@@ -284,12 +284,12 @@ _coordinatesFromAddress(address){
          this.setState({destinationLocation: myPosition,});
          this._getRiderRoute();
          this.setState({ calculatingRoute: true });
-           AsyncStorage.setItem("destinationLocation",myPosition);
+           AsyncStorage.setItem("destinationLocation",JSON.stringify(myPosition));
        }else{
          this.setState({currentLocation: myPosition,});
          this.setState({region:{latitude:location.lat,longitude:location.lng,latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421}});
-        AsyncStorage.setItem("currentLocation",myPosition);
+        AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
        }
     }
  }).done();
@@ -1804,7 +1804,7 @@ get renderMyLocationButton() {
     if(this.state.isRideStarted){
         return(
             <View style={{flexDirection:'column'}}>
-                <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon } onPress={this.rideEndByDriver.bind(this)}>
+                <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonCallIcon }>
                   <Image source={ require("@Resources/Images/ride-start-icon.png") } style={ styles.imageCallIcon }/>
                 </TouchableHighlight>
                 <TouchableHighlight activeOpacity={ .5 } style={ styles.buttonEndRideText } onPress={this.rideEndByDriver.bind(this)}>
@@ -2484,8 +2484,6 @@ showRateViewForDriver(){
   this.setState({driverStartedRide:false});
   this.setState({isRideStarted:false})
   this.setState({rateRiderPopup:true})
-
-
   this.setState({isDriverApprovedRide:false})
   this.setState({rateDriverPopup:true})
   this.setState({loaderVisible:false});

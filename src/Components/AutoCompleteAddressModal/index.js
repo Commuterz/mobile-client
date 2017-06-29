@@ -27,7 +27,7 @@ export default class AutoCompleteAddressModel extends Component {
   {
     return (
       <View style={{ flex:1 }}>
-          {Platform === 'ios' &&
+          {Platform.OS === 'ios' &&
           <View style={{height:20,backgroundColor:'rgba(38,164,206,1)'}}></View>
           }
            <GooglePlacesAutocomplete
