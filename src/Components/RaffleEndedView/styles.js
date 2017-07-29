@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
      color: '#ffffff',
      textAlign :'center',
      marginTop : 15,
+     backgroundColor:'transparent'
   },
   user_view: {
     flexDirection: 'row',
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
      fontStyle :'italic',
      textAlign :'center',
      marginLeft:5,
+     backgroundColor:'transparent',
   },
   price_text:{
      fontFamily: 'Exo-Bold',
@@ -90,6 +92,7 @@ const styles = StyleSheet.create({
      color: '#ffffff',
      textAlign :'center',
      marginTop:15,
+     backgroundColor:'transparent',
   },
   coin_bg_view: {
     height: 78,

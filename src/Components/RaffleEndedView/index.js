@@ -61,14 +61,16 @@ class RaffleEnded extends Component
               <Text style={styles.coin_text}>1000</Text>
             </View>
           </View>
-          <TouchableHighlight  onPress={this.collectPrice.bind(this)}>
-          <View style={styles.collect_view}>
-            <Text style={styles.collect_text}>Collect</Text>
-          </View>
-          </TouchableHighlight>
+
         </View>
       </View>
     )
   }
 }
 export default RaffleEnded
+
+// <TouchableHighlight  onPress={this.collectPrice.bind(this)}>
+// <View style={styles.collect_view}>
+//   <Text style={styles.collect_text}>Collect</Text>
+// </View>
+// </TouchableHighlight>
