@@ -30,9 +30,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 5,
+    width:20,
+    height:'60%',
+
   },
   imageMenu:{
-
+    marginRight:15,
   },
   userInfoContainer: {
     flex: 1,

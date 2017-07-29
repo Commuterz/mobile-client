@@ -63,7 +63,7 @@ componentWillMount(){
  _loginWithFacebook()
  {
 
-   //this.logoutFromFacebook();
+   this.logoutFromFacebook();
    //LoginManager.setLoginBehavior(LoginManager.LoginBehaviors.WEB_VIEW_ONLY); // defaults to Native
   LoginManager.setLoginBehavior(Platform.OS === 'ios' ? 'web' : 'web_only')
    var self = this;
@@ -96,6 +96,7 @@ fetchUserData(){
       //Alert.alert('Facebook Profile Data',JSON.stringify(result));
       userPassword = result.id;
       facebookProfileResult = result;
+      console.warn("JSON" + JSON.stringify(facebookProfileResult))
       self.registerUser();
     }
   }
@@ -128,8 +129,10 @@ registerUser(){
 
       userPrivateKey = api.getPrivateKey(userPassword, userSalt);
       userEthereumAddress = api.privateKeyToAddress(userPrivateKey);
+
       AsyncStorage.setItem("userPrivateKey", userPrivateKey)
       AsyncStorage.setItem("userEthereumAddress", userEthereumAddress)
+      //alert('here..1' +userPrivateKey);
       this.checkIsAlreadyRegister(userEthereumAddress);
     }else{
         Alert.alert("Alert","No Internet Connection Found!!" );
@@ -140,16 +143,17 @@ registerUser(){
 
 /*******Method check or user registration If true it will login directly else process for registration calls***************/
 checkIsAlreadyRegister(userEthereumAddress){
+  //  alert('here..2' +userEthereumAddress);
   var self = this;
   registerApiCall.isAlreadyRegistered(userEthereumAddress,function(err,result){
-    if(err && result ==='false'){
+    if(err && result === 'false'){
       Alert.alert("Alert","Something went wrong while login \n" +err)
     }else{
       if(result){
           //alert("isAlreadyRegistered");
           self.addUserDataAndGetIPFS('1');//1 for user is already register
       }else{
-        //alert("You are not registered user of commuterz");
+          //alert("You are not registered user of commuterz");
           registerApiCall.etherInRegistration(userEthereumAddress,function(err,result){
               if(result){
                   self.addUserDataAndGetIPFS('0');//0 for user is not  register
@@ -168,23 +172,33 @@ checkIsAlreadyRegister(userEthereumAddress){
 
 /*****Adding user profiles and get ipfs token***************/
 addUserDataAndGetIPFS(value){
+  //alert('here..2'+"value" +value +JSON.stringify(facebookProfileResult));
   var jsonData = JSON.stringify(facebookProfileResult);
-  console.log("FBDATA" +jsonData);
   var self = this;
   webAPICall.postApiWithJosnDataInMainThread(addProfileJSON,jsonData,'POST').then((result) =>
    {
     if(result)
       {
-          //alert("Adding User Data and GET IPFS Token " + result.ipfshash);
+          //alert("Adding User Data and GET IPFS Token " + JSON.stringify(result));
+          if(result.err){
+            Alert.alert("Alert","Something went wrong while getting iPFS token.")
+            self.setState({loaderVisible:false})
+          }else{
             userIpfs = result.ipfshash;
-            AsyncStorage.setItem("userIpfs", userIpfs)
-            if(value === '1'){
-              //alert("Open Map Page ");
-              self.openHomeScreen();
+            //alert('userIpfs' +userIpfs)
+            if(typeof userIpfs === 'undefined'){
+                Alert.alert("Alert","Something went wrong while getting iPFS token.")
+                self.setState({loaderVisible:false})
             }else{
-              //alert("Registering to Commuterz");
-              self.registerUserToCommuterz();
+              AsyncStorage.setItem("userIpfs", userIpfs === 'undefined'?'':userIpfs)
+              if(value === '1'){
+                self.openHomeScreen();
+              }else{
+                self.registerUserToCommuterz();
+              }
             }
+
+          }
         }
     }).done();
 }

@@ -44,13 +44,16 @@ onShop() {
        if (!errs) {
            if (userPrivateKey !== null) {
              loginUserApiCall.shopCall(userPrivateKey ,function(err,result){
+               console.warn('shop result' + result);
                if(result){
-                  self.setState({loaderVisible:false});
-                 Alert.alert('Alert','You have shoped successfully.');
+
+                 Alert.alert( 'Alert', 'You have shoped successfully.',
+                [ {text: 'Ok', onPress: () => self.setState({loaderVisible:false})}, ], { cancelable: false } )
 
                }else{
                  self.setState({loaderVisible:false});
-                 Alert.alert('Alert','Error '+err);
+                 Alert.alert('Alert','Error '+err,
+                [ {text: 'Ok', onPress: () => self.setState({loaderVisible:false})}, ], { cancelable: false });
                }
              });
           }

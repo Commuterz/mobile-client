@@ -183,8 +183,6 @@ export default class Home extends Component
     };
 }
 
-
-
 componentDidMount() {
    AsyncStorage.getItem("userPrivateKey", (errs,result) => {
         if (!errs) {
@@ -229,33 +227,6 @@ checkPermissionAndroid(){
     });
 }
 
-/*onMoveMyLocation() {
-  navigator.geolocation.getCurrentPosition( (position) => {
-      let myPosition = {latitude: position.coords.latitude,longitude: position.coords.longitude,};
-      this.setState({currentLocation: myPosition, myLocationAddress: position.coords.latitude.toString()+ ' ,' + position.coords.longitude.toString()});
-      this.setState({driverCurrentLocation:myPosition});
-      this.setState({region:{latitude:position.coords.latitude,longitude:position.coords.longitude,
-                     latitudeDelta: 0.0922,longitudeDelta: 0.0421}});
-     this._addressFromCoordinates(position.coords.latitude,position.coords.longitude);
-     this.updateLastLocationOfDriver(myPosition);
-    },
-    (error) => Alert.alert('Alert',"Unable to get your location."),
-    { enableHighAccuracy: false, timeout: 30000, maximumAge: 1000 }
-  );
-
-   this.watchID = navigator.geolocation.watchPosition((position) =>
-   {
-      var lastPosition = JSON.stringify(position);
-      let myPosition = {latitude: position.coords.latitude,longitude: position.coords.longitude,};
-      this.setState({currentLocation: myPosition,myLocationAddress: position.coords.latitude.toString()+ ' ,' + position.coords.longitude.toString(),});
-      this.setState({driverCurrentLocation:myPosition});
-      this.setState({region:{latitude:position.coords.latitude,longitude:position.coords.longitude,latitudeDelta: 0.0922,
-             longitudeDelta: 0.0421}});
-     this.updateLastLocationOfDriver(myPosition);
-     this._addressFromCoordinates(position.coords.latitude,position.coords.longitude);
-    });
-}*/
-
 /**Getting Address from latitude and longitude @author SynsoftGlobal******/
 _addressFromCoordinates(lat,lng){
    GeocodeCall.getAddressFromLatLng(lat,lng).then((json) =>
@@ -284,15 +255,24 @@ _coordinatesFromAddress(address){
          this.setState({destinationLocation: myPosition,});
          this._getRiderRoute();
          this.setState({ calculatingRoute: true });
-           AsyncStorage.setItem("destinationLocation",JSON.stringify(myPosition));
+         this.setAsyncStorageValues("destinationLocation",myPosition);
+        //AsyncStorage.setItem("destinationLocation",JSON.stringify(myPosition));
        }else{
          this.setState({currentLocation: myPosition,});
          this.setState({region:{latitude:location.lat,longitude:location.lng,latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421}});
-        AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
+         this.setAsyncStorageValues("currentLocation",myPosition);
+        //AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
        }
     }
  }).done();
+}
+
+setAsyncStorageValues(key, value) {
+  console.warn("Key Value" + key +" value" + value);
+  value = JSON.stringify(value)
+  if (value) return AsyncStorage.setItem(key, value)
+  else console.warn('not set, stringify failed:', key, value)
 }
 
 onChangeLocation(text) {
@@ -396,12 +376,14 @@ getCurrentLocation(){
               //console.warn('distance Location' + distance)
               if(distance >= 1){
                 self.setState({lastLocationDistance:distance.toString()})
-                AsyncStorage.setItem("currentLocation",JSON.stringify(location))
+                //AsyncStorage.setItem("currentLocation",JSON.stringify(location))
+                self.setAsyncStorageValues("currentLocation",location);
                 self.updateStateOfLocation(location);
               }
             });
           }else{
-            AsyncStorage.setItem("currentLocation",JSON.stringify(location))
+            self.setAsyncStorageValues("currentLocation",location);
+            //AsyncStorage.setItem("currentLocation",JSON.stringify(location))
             self.updateStateOfLocation(location);
           }
         }
@@ -434,14 +416,19 @@ updateStateOfLocation(location){
 }
 
 updateLastLocationOfDriver(myPosition){
+  var self = this;
    AsyncStorage.getItem("lastLocation", (errs,result) => {
         if (!errs) {
             if (result !== null) {
-              AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
-              AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
-              AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+              // AsyncStorage.setItem("currentLocation",JSON.stringify(myPosition));
+              // AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(myPosition));
+              // AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+              self.setAsyncStorageValues("currentLocation",myPosition);
+              self.setAsyncStorageValues("driverCurrentLocation",myPosition);
+              self.setAsyncStorageValues("lastLocation",myPosition);
             }else{
-              AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+              //AsyncStorage.setItem("lastLocation",JSON.stringify(myPosition));
+              self.setAsyncStorageValues("lastLocation",myPosition);
             }
          }
     });
@@ -572,8 +559,15 @@ fetchUserProfileData(){
                 /******{"picture": {"data": {"is_silhouette": true,
                       "url": "https://scontent.xx.fbcdn.net/v/t1.0-1/c15.0.50.50/p50x50/1379841_10150004552801901_469209496895221757_n.jpg?oh=d501be4493d45eab9adf54b6b8953587&oe=59A25233"
                     }},  "name": "Ashley Last Synsoft","id": "100005020412363"}*************/
+                  var profilePic ='';
+                  console.warn('fb' +JSON.stringify(result))
+                  if(result.picture !=null || result.picture!='undefined'){
+                    if(result.picture.data !=null || result.picture.data !='undefined'){
+                       profilePic = result.picture.data.url;
+                    }
+                  }
 
-                  var profilePic = result.picture.data.url;
+
                   var name =  result.name;
                   var fbID = result.id;
                   self.setState({loginUserData:result});
@@ -927,8 +921,10 @@ updateDriverRideRequestData(body){
     AsyncStorage.setItem("driver","ride_request");
     AsyncStorage.setItem("type","isDriver");
     AsyncStorage.setItem("riderDeviceToken",riderDeviceToken);
-    AsyncStorage.setItem("driverPickUpSource",JSON.stringify(riderSourcePoints));
-    AsyncStorage.setItem("driverPickUpDestination",JSON.stringify(riderDestinationPoints));
+    //AsyncStorage.setItem("driverPickUpSource",JSON.stringify(riderSourcePoints));
+    //AsyncStorage.setItem("driverPickUpDestination",JSON.stringify(riderDestinationPoints));
+    this.setAsyncStorageValues("driverPickUpSource",riderSourcePoints);
+    this.setAsyncStorageValues("driverPickUpDestination",riderDestinationPoints);
     AsyncStorage.setItem("driverPickUpSourceAddress",sourceAddress);
     AsyncStorage.setItem("driverPickUpDestinationAddress",destinationAddress);
     AsyncStorage.setItem("driverRideRequestCost",rideCost);
@@ -1200,7 +1196,8 @@ rideStartAtRiderSide(body){
     this.setState({riderDistanceRemained:distanceRemained});
 
 
-    AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(driverCurrentLocation));
+  //  AsyncStorage.setItem("driverCurrentLocation",JSON.stringify(driverCurrentLocation));
+    this.setAsyncStorageValues("driverCurrentLocation",driverCurrentLocation);
     AsyncStorage.setItem("driverCarName",carName);
     AsyncStorage.setItem("driverCarPlateNumber",carPlateNumber);
     AsyncStorage.setItem("driverFullName",driverName);
@@ -1320,7 +1317,12 @@ _getRiderRoute(){
              });
 
             }else{
-              Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+              if(Platform.OS ==='ios'){
+                Alert.alert("Alert","Something went wrong geting route directions.")
+
+              }else{
+                Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+              }
               self.setState({ calculatingRoute: false });
             }
           }
@@ -2197,7 +2199,11 @@ drawRouteBtwDriverAndRiderLocation(){
 
         }
       }else{
-        Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+        if(Platform.OS ==='android'){
+          Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+        }else{
+          Alert.alert("Alert","Something went wrong geting route directions.")
+        }
       }
   });
 }
@@ -2396,7 +2402,12 @@ getTimeAndDistanceRemainedUsingDirectionAPI(value){
 
         }
       }else{
-        Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+        if(Platform.OS === 'android'){
+          Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
+        }else{
+          Alert.alert("Alert","Something went wrong geting route directions." )
+
+        }
       }
   });
 }
