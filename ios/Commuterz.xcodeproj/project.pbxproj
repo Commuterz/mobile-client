@@ -19,6 +19,11 @@
 		0211CE0A1F02400400162A63 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0211CE021F02400400162A63 /* GoogleService-Info.plist */; };
 		0211CE0B1F02400400162A63 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0211CE041F02400400162A63 /* FirebaseMessaging.framework */; };
 		0211CE0C1F02400400162A63 /* Protobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0211CE051F02400400162A63 /* Protobuf.framework */; };
+		023A781E1F2CAAA000DF4488 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 023A781A1F2CAAA000DF4488 /* Bolts.framework */; };
+		023A781F1F2CAAA000DF4488 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 023A781B1F2CAAA000DF4488 /* FBSDKCoreKit.framework */; };
+		023A78201F2CAAA000DF4488 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 023A781C1F2CAAA000DF4488 /* FBSDKLoginKit.framework */; };
+		023A78211F2CAAA000DF4488 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 023A781D1F2CAAA000DF4488 /* FBSDKShareKit.framework */; };
+		023A78281F2CAC7A00DF4488 /* libRCTFBSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 023A78271F2CAC6200DF4488 /* libRCTFBSDK.a */; };
 		059E36FEF2F44CB092E100E7 /* focusLocation.png in Resources */ = {isa = PBXBuildFile; fileRef = FCA5F8B7A2D8409BA79DE23E /* focusLocation.png */; };
 		0860E5D447FD4E938FC75A95 /* add-photo.png in Resources */ = {isa = PBXBuildFile; fileRef = 43098EE995DD49369CEF10E1 /* add-photo.png */; };
 		0AAE378A95CC47E5B04E6CCA /* Exo-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E4EB9538D894236A31D40DB /* Exo-Regular.ttf */; };
@@ -69,11 +74,6 @@
 		4C178D6F1EDD8C960049EDB5 /* libRNBackgroundTimer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C704D061ED810A900AB2666 /* libRNBackgroundTimer.a */; };
 		4C178D701EDD8CA30049EDB5 /* libRNFIRMessaging.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C704D0B1ED810A900AB2666 /* libRNFIRMessaging.a */; };
 		4C178D711EDD8CAF0049EDB5 /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C704D0E1ED810A900AB2666 /* libSplashScreen.a */; };
-		4C178D721EDD8CC00049EDB5 /* libRCTFBSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C178D471EDD8BA60049EDB5 /* libRCTFBSDK.a */; };
-		4C178D871EDD95680049EDB5 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C178D831EDD95680049EDB5 /* Bolts.framework */; };
-		4C178D881EDD95680049EDB5 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C178D841EDD95680049EDB5 /* FBSDKCoreKit.framework */; };
-		4C178D891EDD95680049EDB5 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C178D851EDD95680049EDB5 /* FBSDKLoginKit.framework */; };
-		4C178D8A1EDD95680049EDB5 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C178D861EDD95680049EDB5 /* FBSDKShareKit.framework */; };
 		4C704D241ED81F3500AB2666 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C704D201ED81F3500AB2666 /* FirebaseCore.framework */; };
 		4C704D291ED81F6B00AB2666 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C704D271ED81F6B00AB2666 /* FirebaseMessaging.framework */; };
 		4C704D3B1ED8233C00AB2666 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4C704D3A1ED8233C00AB2666 /* GoogleService-Info.plist */; };
@@ -198,6 +198,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 5DBEB1501B18CEA900B34395;
 			remoteInfo = RNVectorIcons;
+		};
+		023A78261F2CAC6200DF4488 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 023A78221F2CAC6100DF4488 /* RCTFBSDK.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9350E0F11CE3B0920041D815;
+			remoteInfo = RCTFBSDK;
 		};
 		139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -325,13 +332,6 @@
 			remoteGlobalIDString = 3D3CD9181DE5FBD800167DC4;
 			remoteInfo = "jschelpers-tvOS";
 		};
-		4C178D461EDD8BA60049EDB5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A16F637A701C45C9A6F2F559 /* RCTFBSDK.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9350E0F11CE3B0920041D815;
-			remoteInfo = RCTFBSDK;
-		};
 		4C704D051ED810A900AB2666 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D24A9F40D6DE4D23A9AAEBDA /* RNBackgroundTimer.xcodeproj */;
@@ -407,6 +407,11 @@
 		0211CE021F02400400162A63 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0211CE041F02400400162A63 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseMessaging.framework; sourceTree = "<group>"; };
 		0211CE051F02400400162A63 /* Protobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Protobuf.framework; sourceTree = "<group>"; };
+		023A781A1F2CAAA000DF4488 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Bolts.framework; sourceTree = "<group>"; };
+		023A781B1F2CAAA000DF4488 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKCoreKit.framework; sourceTree = "<group>"; };
+		023A781C1F2CAAA000DF4488 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKLoginKit.framework; sourceTree = "<group>"; };
+		023A781D1F2CAAA000DF4488 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKShareKit.framework; sourceTree = "<group>"; };
+		023A78221F2CAC6100DF4488 /* RCTFBSDK.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTFBSDK.xcodeproj; path = "../node_modules/react-native-fbsdk/ios/RCTFBSDK.xcodeproj"; sourceTree = "<group>"; };
 		024CA9CC1F04CA9D005CF9DC /* Commuterz.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Commuterz.entitlements; path = Commuterz/Commuterz.entitlements; sourceTree = "<group>"; };
 		054B589B3B1F4E4C8D9A97E5 /* path-icon@2x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "path-icon@2x.png"; path = "../app/assets/imgs/path-icon@2x.png"; sourceTree = "<group>"; };
 		0CF4F6D0F17F456EA7003F38 /* destination-flag-blue.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "destination-flag-blue.png"; path = "../app/assets/imgs/destination-flag-blue.png"; sourceTree = "<group>"; };
@@ -445,10 +450,6 @@
 		477DBA1302054EEAADF47159 /* oval@3x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "oval@3x.png"; path = "../app/assets/imgs/oval@3x.png"; sourceTree = "<group>"; };
 		482CF9F7D9734BF0B5BFBDD1 /* destination-flag-blue@3x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "destination-flag-blue@3x.png"; path = "../app/assets/imgs/destination-flag-blue@3x.png"; sourceTree = "<group>"; };
 		4940A09A2FD249CC89096BF4 /* menu-icon@2x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "menu-icon@2x.png"; path = "../app/assets/imgs/menu-icon@2x.png"; sourceTree = "<group>"; };
-		4C178D831EDD95680049EDB5 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = Facebook/Bolts.framework; sourceTree = "<group>"; };
-		4C178D841EDD95680049EDB5 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = Facebook/FBSDKCoreKit.framework; sourceTree = "<group>"; };
-		4C178D851EDD95680049EDB5 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = Facebook/FBSDKLoginKit.framework; sourceTree = "<group>"; };
-		4C178D861EDD95680049EDB5 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKShareKit.framework; path = Facebook/FBSDKShareKit.framework; sourceTree = "<group>"; };
 		4C704D201ED81F3500AB2666 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCore.framework; path = Firebase/Analytics/FirebaseCore.framework; sourceTree = "<group>"; };
 		4C704D271ED81F6B00AB2666 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseMessaging.framework; path = Firebase/Messaging/FirebaseMessaging.framework; sourceTree = "<group>"; };
 		4C704D3A1ED8233C00AB2666 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Firebase/GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -485,7 +486,6 @@
 		99C701641CAF4540A3561136 /* driver-car.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "driver-car.png"; path = "../app/assets/imgs/driver-car.png"; sourceTree = "<group>"; };
 		9AB07F9B0EC04387BFD0F5C7 /* focusLocation@2x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "focusLocation@2x.png"; path = "../app/assets/imgs/focusLocation@2x.png"; sourceTree = "<group>"; };
 		9F9C1971D5434B04A7013FDC /* search-blue@2x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "search-blue@2x.png"; path = "../app/assets/imgs/search-blue@2x.png"; sourceTree = "<group>"; };
-		A16F637A701C45C9A6F2F559 /* RCTFBSDK.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTFBSDK.xcodeproj; path = "../node_modules/react-native-fbsdk/ios/RCTFBSDK.xcodeproj"; sourceTree = "<group>"; };
 		A44D24175B3F4F8E83F5D73B /* calculating-route@3x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "calculating-route@3x.png"; path = "../app/assets/imgs/calculating-route@3x.png"; sourceTree = "<group>"; };
 		A7CE78E429D54D2495AC70D6 /* token@3x.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "token@3x.png"; path = "../app/assets/imgs/token@3x.png"; sourceTree = "<group>"; };
 		AC7656190FC04B73AB94C6B4 /* libRNVectorIcons.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNVectorIcons.a; sourceTree = "<group>"; };
@@ -532,12 +532,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C178D871EDD95680049EDB5 /* Bolts.framework in Frameworks */,
-				4C178D881EDD95680049EDB5 /* FBSDKCoreKit.framework in Frameworks */,
+				023A78281F2CAC7A00DF4488 /* libRCTFBSDK.a in Frameworks */,
+				023A781E1F2CAAA000DF4488 /* Bolts.framework in Frameworks */,
+				023A781F1F2CAAA000DF4488 /* FBSDKCoreKit.framework in Frameworks */,
+				023A78201F2CAAA000DF4488 /* FBSDKLoginKit.framework in Frameworks */,
+				023A78211F2CAAA000DF4488 /* FBSDKShareKit.framework in Frameworks */,
 				0211CE0C1F02400400162A63 /* Protobuf.framework in Frameworks */,
-				4C178D891EDD95680049EDB5 /* FBSDKLoginKit.framework in Frameworks */,
-				4C178D8A1EDD95680049EDB5 /* FBSDKShareKit.framework in Frameworks */,
-				4C178D721EDD8CC00049EDB5 /* libRCTFBSDK.a in Frameworks */,
 				4C178D711EDD8CAF0049EDB5 /* libSplashScreen.a in Frameworks */,
 				4C178D701EDD8CA30049EDB5 /* libRNFIRMessaging.a in Frameworks */,
 				4C178D6F1EDD8C960049EDB5 /* libRNBackgroundTimer.a in Frameworks */,
@@ -709,6 +709,14 @@
 			path = Messaging;
 			sourceTree = "<group>";
 		};
+		023A78231F2CAC6100DF4488 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				023A78271F2CAC6200DF4488 /* libRCTFBSDK.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		139105B71AF99BAD00B5F7CC /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -766,14 +774,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4C178D3F1EDD8BA60049EDB5 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4C178D471EDD8BA60049EDB5 /* libRCTFBSDK.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		4C704CE31ED810A800AB2666 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -802,10 +802,10 @@
 		4C704D1E1ED81F3300AB2666 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4C178D831EDD95680049EDB5 /* Bolts.framework */,
-				4C178D841EDD95680049EDB5 /* FBSDKCoreKit.framework */,
-				4C178D851EDD95680049EDB5 /* FBSDKLoginKit.framework */,
-				4C178D861EDD95680049EDB5 /* FBSDKShareKit.framework */,
+				023A781A1F2CAAA000DF4488 /* Bolts.framework */,
+				023A781B1F2CAAA000DF4488 /* FBSDKCoreKit.framework */,
+				023A781C1F2CAAA000DF4488 /* FBSDKLoginKit.framework */,
+				023A781D1F2CAAA000DF4488 /* FBSDKShareKit.framework */,
 				4C704D421ED8252A00AB2666 /* Protobuf.framework */,
 				4C704D3E1ED8251D00AB2666 /* FirebaseAnalytics.framework */,
 				4C704D3F1ED8251D00AB2666 /* GoogleToolboxForMac.framework */,
@@ -837,6 +837,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				023A78221F2CAC6100DF4488 /* RCTFBSDK.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
@@ -852,7 +853,6 @@
 				D24A9F40D6DE4D23A9AAEBDA /* RNBackgroundTimer.xcodeproj */,
 				3789381E8A144FB5B9B3EB34 /* RNFIRMessaging.xcodeproj */,
 				1B857CE475334A68A1CB8296 /* SplashScreen.xcodeproj */,
-				A16F637A701C45C9A6F2F559 /* RCTFBSDK.xcodeproj */,
 				450C50E4F8A345BABB16BF92 /* RNImagePicker.xcodeproj */,
 				7A9F0BEC6B2A439EA737BD19 /* RCTBackgroundGeolocation.xcodeproj */,
 				3E688A17843942EDBFBB48DC /* RNVectorIcons.xcodeproj */,
@@ -1099,8 +1099,8 @@
 					ProjectRef = 7A9F0BEC6B2A439EA737BD19 /* RCTBackgroundGeolocation.xcodeproj */;
 				},
 				{
-					ProductGroup = 4C178D3F1EDD8BA60049EDB5 /* Products */;
-					ProjectRef = A16F637A701C45C9A6F2F559 /* RCTFBSDK.xcodeproj */;
+					ProductGroup = 023A78231F2CAC6100DF4488 /* Products */;
+					ProjectRef = 023A78221F2CAC6100DF4488 /* RCTFBSDK.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302B61ABCB90400DB3ED1 /* Products */;
@@ -1225,6 +1225,13 @@
 			remoteRef = 0211CDB81F023B6100162A63 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		023A78271F2CAC6200DF4488 /* libRCTFBSDK.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRCTFBSDK.a;
+			remoteRef = 023A78261F2CAC6200DF4488 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		139105C11AF99BAD00B5F7CC /* libRCTSettings.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1342,13 +1349,6 @@
 			fileType = archive.ar;
 			path = libjschelpers.a;
 			remoteRef = 3DAD3EAE1DF850E9000B6D8A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		4C178D471EDD8BA60049EDB5 /* libRCTFBSDK.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTFBSDK.a;
-			remoteRef = 4C178D461EDD8BA60049EDB5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		4C704D061ED810A900AB2666 /* libRNBackgroundTimer.a */ = {
@@ -1605,7 +1605,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = Commuterz/Commuterz.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 5B2U6DQNGF;
@@ -1613,12 +1613,11 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Firebase/Analytics",
 					"$(PROJECT_DIR)/Firebase/Messaging",
-					"$(PROJECT_DIR)/Facebook",
-					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Firebase/AdMob",
 					"$(PROJECT_DIR)/Firebase/AppIndexing",
 					"$(PROJECT_DIR)/Firebase/Auth",
 					"$(PROJECT_DIR)/Firebase/Crash",
+					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1660,8 +1659,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.app.commuterz;
 				PRODUCT_NAME = Commuterz;
-				PROVISIONING_PROFILE = "ed52c424-bf1d-43e5-bd23-5583012a12aa";
-				PROVISIONING_PROFILE_SPECIFIER = Commuterz;
+				PROVISIONING_PROFILE = "d4ae8aab-56f4-42da-adae-f5433e075c52";
+				PROVISIONING_PROFILE_SPECIFIER = CommuterzDevelopment;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1672,19 +1671,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = Commuterz/Commuterz.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5B2U6DQNGF;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Firebase/Analytics",
 					"$(PROJECT_DIR)/Firebase/Messaging",
-					"$(PROJECT_DIR)/Facebook",
-					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Firebase/AdMob",
 					"$(PROJECT_DIR)/Firebase/AppIndexing",
 					"$(PROJECT_DIR)/Firebase/Auth",
 					"$(PROJECT_DIR)/Firebase/Crash",
+					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1726,8 +1724,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.app.commuterz;
 				PRODUCT_NAME = Commuterz;
-				PROVISIONING_PROFILE = "ed52c424-bf1d-43e5-bd23-5583012a12aa";
-				PROVISIONING_PROFILE_SPECIFIER = Commuterz;
+				PROVISIONING_PROFILE = "d4ae8aab-56f4-42da-adae-f5433e075c52";
+				PROVISIONING_PROFILE_SPECIFIER = CommuterzDevelopment;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

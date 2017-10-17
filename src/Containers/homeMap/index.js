@@ -1318,7 +1318,10 @@ _getRiderRoute(){
 
             }else{
               if(Platform.OS ==='ios'){
-                Alert.alert("Alert","Something went wrong geting route directions.")
+                Alert.alert( 'Alert', 'Something went wrong getting route directions.' ,
+                [
+                  {text: 'OK', onPress: () => self.setState({calculatingRoute:false})},
+                ], { cancelable: false } );
 
               }else{
                 Alert.alert("Alert","Something went wrong geting route directions." + JSON.stringify(responseJson.message))
@@ -2484,8 +2487,10 @@ rideEndByDriver(){
       if(result){
           self.showRateViewForDriver();
       }else{
-        Alert.alert("Alert","Something went wrong while ending your ride." +err);
-        this.setState({loaderVisible:false});
+        Alert.alert( 'Alert', 'Something went wrong while ending your ride.' +err,
+        [
+          {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+        ], { cancelable: false } );
       }
   });
 }

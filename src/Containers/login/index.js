@@ -44,10 +44,6 @@ class Login extends Component
     };
 
   }
-
-componentDidMount(){
-
-}
 componentWillMount(){
   this.setState({hideOtherComponent:true})
   var  self = this;
@@ -90,7 +86,11 @@ fetchUserData(){
   const responseInfoCallback = function(error, result) {
     if (error) {
       console.log(error)
-      Alert.alert('Alert','Error fetching data: ' + error.toString());
+      Alert.alert( 'Alert', 'Something went wrong fetchng user data.',
+      [
+        {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+      ], { cancelable: false } );
+
     } else {
       console.log(result)
       //Alert.alert('Facebook Profile Data',JSON.stringify(result));
@@ -135,7 +135,10 @@ registerUser(){
       //alert('here..1' +userPrivateKey);
       this.checkIsAlreadyRegister(userEthereumAddress);
     }else{
-        Alert.alert("Alert","No Internet Connection Found!!" );
+        Alert.alert( 'Alert', 'No Internet Connection Found!!',
+        [
+          {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+        ], { cancelable: false } );
     }
 
   });
@@ -147,7 +150,10 @@ checkIsAlreadyRegister(userEthereumAddress){
   var self = this;
   registerApiCall.isAlreadyRegistered(userEthereumAddress,function(err,result){
     if(err && result === 'false'){
-      Alert.alert("Alert","Something went wrong while login \n" +err)
+      Alert.alert( 'Alert', 'Something went wrong while while login \n' +err,
+      [
+        {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+      ], { cancelable: false } );
     }else{
       if(result){
           //alert("isAlreadyRegistered");
@@ -158,8 +164,11 @@ checkIsAlreadyRegister(userEthereumAddress){
               if(result){
                   self.addUserDataAndGetIPFS('0');//0 for user is not  register
                 }else{
-                  Alert.alert("Alert","Error in registration.\n" +err)
-                  self.setState({loaderVisible:false})
+                  Alert.alert( 'Alert', 'Something went wrong while while registration \n' +err,
+                  [
+                    {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+                  ], { cancelable: false } );
+
               }
           });
 
@@ -181,14 +190,18 @@ addUserDataAndGetIPFS(value){
       {
           //alert("Adding User Data and GET IPFS Token " + JSON.stringify(result));
           if(result.err){
-            Alert.alert("Alert","Something went wrong while getting iPFS token.")
-            self.setState({loaderVisible:false})
+            Alert.alert( 'Alert', 'Something went wrong while getting iPFS token.',
+            [
+              {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+            ], { cancelable: false } );
           }else{
             userIpfs = result.ipfshash;
             //alert('userIpfs' +userIpfs)
             if(typeof userIpfs === 'undefined'){
-                Alert.alert("Alert","Something went wrong while getting iPFS token.")
-                self.setState({loaderVisible:false})
+              Alert.alert( 'Alert', 'Something went wrong while getting iPFS token.',
+              [
+                {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+              ], { cancelable: false } );
             }else{
               AsyncStorage.setItem("userIpfs", userIpfs === 'undefined'?'':userIpfs)
               if(value === '1'){
@@ -212,8 +225,10 @@ registerUserToCommuterz(){
           //alert("Registerion success Getting Token" );
           self.approveTokensToContract();
       }else{
-        Alert.alert("Alert","Registration Failed.\n" + err)
-        self.setState({loaderVisible:false})
+        Alert.alert( 'Alert', 'Something went wrong while registering you at commuterz.',
+        [
+          {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+        ], { cancelable: false } );
       }
 
   });
@@ -228,8 +243,10 @@ approveTokensToContract(){
         Alert.alert("Registration", "Registration completed successfully." ,
          [ {text: 'OK', onPress: () => self.openHomeScreen()}, ] )
       }else{
-        Alert.alert("Alert","Something went wrong.\n" +err)
-        self.setState({loaderVisible:false})
+        Alert.alert( 'Alert', 'Something went wrong \n' +err,
+        [
+          {text: 'OK', onPress: () => self.setState({loaderVisible:false})},
+        ], { cancelable: false } );
       }
 
   });
